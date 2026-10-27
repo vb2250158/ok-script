@@ -311,6 +311,34 @@ def find_highest_confidence_box(boxes):
     return max(boxes, key=lambda box: box.confidence)
 
 
+def box_overlap_ratio(a, b):
+    ax1, ay1 = int(a.x), int(a.y)
+    ax2, ay2 = ax1 + int(a.width), ay1 + int(a.height)
+    bx1, by1 = int(b.x), int(b.y)
+    bx2, by2 = bx1 + int(b.width), by1 + int(b.height)
+    inter_x1 = max(ax1, bx1)
+    inter_y1 = max(ay1, by1)
+    inter_x2 = min(ax2, bx2)
+    inter_y2 = min(ay2, by2)
+    inter_width = max(0, inter_x2 - inter_x1)
+    inter_height = max(0, inter_y2 - inter_y1)
+    intersection = inter_width * inter_height
+    if intersection <= 0:
+        return 0.0
+    area_a = max(1, int(a.width) * int(a.height))
+    area_b = max(1, int(b.width) * int(b.height))
+    return float(intersection) / float(min(area_a, area_b))
+
+
+def deduplicate_boxes(boxes, overlap_threshold=0.5):
+    unique_boxes = []
+    for box in boxes or []:
+        if any(box_overlap_ratio(box, kept) >= overlap_threshold for kept in unique_boxes):
+            continue
+        unique_boxes.append(box)
+    return unique_boxes
+
+
 def sort_boxes(boxes):
     """
     Sorts boxes from top to bottom, left to right.

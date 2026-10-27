@@ -9,12 +9,18 @@ import subprocess
 import threading
 
 import cv2
+from ok.util.image_io import cv_imread, cv_imwrite
 import numpy as np
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
 from ok.feature.Box import Box, sort_boxes
 from ok.feature.Feature import Feature
+from ok.feature.VisualRuleTemplate import (
+    MIN_VISUAL_RULE_SAMPLES,
+    build_visual_rule_templates,
+    visual_rule_name_for_template,
+)
 from ok.core.events import communicate
 from ok.util.file import get_path_relative_to_exe
 from ok.util.logger import Logger
@@ -75,11 +81,14 @@ class FeatureSet:
         self.debug = debug
         self.feature_dict = {}
         self.box_dict = {}
+        self.visual_rule_dict = {}
         self.load_success = False
         self.feature_processor = feature_processor
         self.hcenter_features = hcenter_features if hcenter_features is not None else []
         self.vcenter_features = vcenter_features if vcenter_features is not None else []
         self._processed_images = set()
+        self._visual_rule_source_fingerprint = None
+        self._possible_visual_rule_names = None
 
         logger.debug(f'Loading features from {self.coco_json}')
 
@@ -92,9 +101,24 @@ class FeatureSet:
         self.default_vertical_variance = default_vertical_variance
         self.lock = threading.Lock()
 
+    def set_coco_json(self, coco_json: str) -> bool:
+        resolved_coco_json = get_path_relative_to_exe(coco_json)
+        if os.path.abspath(resolved_coco_json) == os.path.abspath(self.coco_json):
+            return False
+        with self.lock:
+            self.coco_json = resolved_coco_json
+            self.feature_dict = {}
+            self.box_dict = {}
+            self.visual_rule_dict = {}
+            self._processed_images = set()
+            self._visual_rule_source_fingerprint = None
+            self._possible_visual_rule_names = None
+            self.load_success = os.path.exists(self.coco_json)
+        return True
+
     def feature_exists(self, feature_name: str) -> bool:
         self.ensure_feature(feature_name)
-        return feature_name in self.feature_dict
+        return feature_name in self.feature_dict or feature_name in self.visual_rule_dict
 
     def empty(self) -> bool:
         return len(self.feature_dict) == 0 and len(self.box_dict) == 0
@@ -108,7 +132,10 @@ class FeatureSet:
                 self.height = height
                 self.feature_dict = {}
                 self.box_dict = {}
+                self.visual_rule_dict = {}
                 self._processed_images = set()
+                self._visual_rule_source_fingerprint = None
+                self._possible_visual_rule_names = None
                 self.load_success = os.path.exists(self.coco_json)
         return self.load_success
 
@@ -134,7 +161,10 @@ class FeatureSet:
         if target_feature is None:
             self.feature_dict = {}
             self.box_dict = {}
+            self.visual_rule_dict = {}
             self._processed_images = set()
+            self._visual_rule_source_fingerprint = None
+            self._possible_visual_rule_names = None
         features, boxes, compressed, self.load_success, image_keys = read_from_json(self.coco_json, self.width,
                                                                                    self.height,
                                                                                    self.hcenter_features,
@@ -176,21 +206,148 @@ class FeatureSet:
                             logger.info(f'Merged {len(imp_features)} namespaced features from import {entry}')
                     except Exception as e:
                         logger.error(f'Failed to merge import features from {entry}: {e}')
+        if target_feature is None:
+            self._rebuild_visual_rules()
+            self._visual_rule_source_fingerprint = self._current_visual_rule_source_fingerprint()
         return self.load_success
 
+    def _rebuild_visual_rules(self):
+        self.visual_rule_dict = build_visual_rule_templates(self.feature_dict, self.box_dict)
+        for rule_name, rule in self.visual_rule_dict.items():
+            if rule_name in self.feature_dict:
+                logger.warning(
+                    f'Visual rule template name conflict: {rule_name}. '
+                    f'Normal template has priority; visual rule samples: {rule.sample_names}'
+                )
+
+    def template_names(self):
+        try:
+            self._refresh_if_visual_rule_sources_changed()
+            if not self.feature_dict and not self.visual_rule_dict:
+                self.process_data()
+        except Exception as e:
+            logger.debug(f'Failed to load feature data while listing template names: {e}')
+        names = set(self.feature_dict.keys())
+        names.update(self.visual_rule_dict.keys())
+        names.update(self._raw_template_names_from_coco_sources())
+        return sorted(names)
+
+    def _raw_template_names_from_coco_sources(self):
+        names = set()
+        for coco_json in self._visual_rule_coco_sources():
+            try:
+                data = load_json(coco_json)
+            except Exception as e:
+                logger.debug(f'Failed to read template names from {coco_json}: {e}')
+                continue
+            names.update(
+                category.get("name")
+                for category in data.get("categories", [])
+                if category.get("name")
+            )
+        return names
+
+    def possible_visual_rule_names(self):
+        if self._possible_visual_rule_names is None:
+            group_counts = {}
+            for template_name in self._raw_template_names_from_coco_sources():
+                rule_name = visual_rule_name_for_template(template_name)
+                if rule_name:
+                    group_counts[rule_name] = group_counts.get(rule_name, 0) + 1
+            self._possible_visual_rule_names = {
+                rule_name
+                for rule_name, count in group_counts.items()
+                if count >= MIN_VISUAL_RULE_SAMPLES
+            }
+        return set(self._possible_visual_rule_names)
+
+    def visual_rules_loaded(self):
+        self._refresh_if_visual_rule_sources_changed()
+        return self._visual_rule_source_fingerprint is not None
+
+    def ensure_visual_rules(self):
+        self._refresh_if_visual_rule_sources_changed()
+        if self._visual_rule_source_fingerprint is None:
+            self.process_data()
+        return self.visual_rule_dict
+
     def ensure_feature(self, feature_name):
-        if feature_name is None or feature_name in self.feature_dict:
+        self._refresh_if_visual_rule_sources_changed()
+        if feature_name is None or feature_name in self.feature_dict or feature_name in self.visual_rule_dict:
             return
         with self.lock:
-            if feature_name not in self.feature_dict:
+            if feature_name not in self.feature_dict and feature_name not in self.visual_rule_dict:
                 self.process_data(feature_name)
+            if (
+                feature_name not in self.feature_dict
+                and feature_name not in self.visual_rule_dict
+                and self._visual_rule_source_fingerprint is None
+            ):
+                self.process_data()
+
+    def _refresh_if_visual_rule_sources_changed(self):
+        if self._visual_rule_source_fingerprint is None:
+            return
+        current_fingerprint = self._current_visual_rule_source_fingerprint()
+        if current_fingerprint != self._visual_rule_source_fingerprint:
+            logger.info("Visual rule template sources changed; rebuilding FeatureSet data")
+            self.process_data()
+
+    def _current_visual_rule_source_fingerprint(self):
+        fingerprint = []
+        for coco_json in self._visual_rule_coco_sources():
+            fingerprint.append(("coco", os.path.abspath(coco_json), self._file_fingerprint(coco_json)))
+            try:
+                data = load_json(coco_json)
+            except Exception as exc:
+                fingerprint.append(("coco_error", os.path.abspath(coco_json), str(exc)))
+                continue
+            coco_folder = os.path.dirname(coco_json)
+            for category in data.get("categories", []):
+                fingerprint.append(("category", category.get("id"), category.get("name")))
+            for annotation in data.get("annotations", []):
+                fingerprint.append((
+                    "annotation",
+                    annotation.get("id"),
+                    annotation.get("image_id"),
+                    annotation.get("category_id"),
+                    tuple(annotation.get("bbox") or []),
+                ))
+            for image_info in data.get("images", []):
+                file_name = image_info.get("file_name") or ""
+                image_path = file_name if os.path.isabs(file_name) else os.path.join(coco_folder, file_name)
+                fingerprint.append(("image", os.path.abspath(image_path), self._file_fingerprint(image_path)))
+        return tuple(fingerprint)
+
+    def _visual_rule_coco_sources(self):
+        sources = []
+        for path in [self.coco_json, os.path.join('ok_tasks', 'assets', 'coco_annotations.json')]:
+            source_paths = [os.path.abspath(item) for item in sources]
+            if path and os.path.exists(path) and os.path.abspath(path) not in source_paths:
+                sources.append(path)
+        ok_import_dir = os.path.join(os.getcwd(), 'ok_import')
+        if os.path.exists(ok_import_dir):
+            for entry in sorted(os.listdir(ok_import_dir)):
+                import_coco = os.path.join(ok_import_dir, entry, 'assets', 'coco_annotations.json')
+                if os.path.exists(import_coco):
+                    sources.append(import_coco)
+        return sources
+
+    @staticmethod
+    def _file_fingerprint(path):
+        try:
+            stat = os.stat(path)
+            return stat.st_mtime_ns, stat.st_size
+        except OSError:
+            return None
 
     def get_box_by_name(self, mat, category_name):
         if mat is None:
             return None
         self.check_size(mat)
         self.ensure_feature(category_name)
-        return self.box_dict.get(category_name)
+        rule = self.visual_rule_dict.get(category_name)
+        return self.box_dict.get(category_name) or (rule.box if rule else None)
 
     def save_images(self, target_folder: str):
         os.makedirs(target_folder, exist_ok=True)
@@ -199,14 +356,30 @@ class FeatureSet:
             file_name = f"{category_name}.jpg"
             file_path = os.path.join(target_folder, file_name)
 
-            cv2.imwrite(file_path, image.mat)
+            cv_imwrite(file_path, image.mat)
 
     def get_feature_by_name(self, mat, name):
         if mat is None:
             return None
         self.check_size(mat)
         self.ensure_feature(name)
-        return self.feature_dict.get(name)
+        rule = self.visual_rule_dict.get(name)
+        return self.feature_dict.get(name) or (rule.feature if rule else None)
+
+    def _feature_search_box(self, feature, horizontal_variance: float, vertical_variance: float):
+        x_offset = self.width * horizontal_variance
+        y_offset = self.height * vertical_variance
+        if feature.scaling != 1:
+            if horizontal_variance == 0:
+                x_offset = 1
+            if vertical_variance == 0:
+                y_offset = 1
+
+        search_x1 = max(0, round(feature.x - x_offset))
+        search_y1 = max(0, round(feature.y - y_offset))
+        search_x2 = min(self.width, round(feature.x + feature.width + x_offset))
+        search_y2 = min(self.height, round(feature.y + feature.height + y_offset))
+        return Box(search_x1, search_y1, max(1, search_x2 - search_x1), max(1, search_y2 - search_y1))
 
     def find_one_feature(self, mat: np.ndarray, category_name, horizontal_variance: float = 0,
                          vertical_variance: float = 0, threshold: float = 0, use_gray_scale: bool = False, x=-1, y=-1,
@@ -228,13 +401,43 @@ class FeatureSet:
             vertical_variance = self.default_vertical_variance
         if template is None:
             self.ensure_feature(category_name)
-        if template is None and category_name not in self.feature_dict:
+        if template is None and category_name not in self.feature_dict and category_name not in self.visual_rule_dict:
             raise ValueError(f"FeatureSet: {category_name} not found in featureDict")
         if template is None:
-            feature = self.feature_dict[category_name]
+            rule = self.visual_rule_dict.get(category_name)
+            feature = self.feature_dict.get(category_name) or (rule.feature if rule else None)
             template = feature.mat
         else:
             feature = None
+        alternative_features = list(getattr(feature, "alternative_features", []) or []) if feature is not None else []
+        if alternative_features and box is None and x == -1 and y == -1:
+            boxes = []
+            for candidate_feature in [feature] + alternative_features:
+                matched_boxes = self.find_one_feature(
+                    mat=mat,
+                    category_name=category_name,
+                    horizontal_variance=horizontal_variance,
+                    vertical_variance=vertical_variance,
+                    threshold=threshold,
+                    use_gray_scale=use_gray_scale,
+                    box=self._feature_search_box(candidate_feature, horizontal_variance, vertical_variance),
+                    canny_lower=canny_lower,
+                    canny_higher=canny_higher,
+                    frame_processor=frame_processor,
+                    template=candidate_feature.mat,
+                    mask_function=mask_function,
+                    match_method=match_method,
+                    screenshot=screenshot,
+                    limit=limit,
+                    target_height=target_height,
+                )
+                for matched_box in matched_boxes:
+                    setattr(matched_box, "matched_feature", candidate_feature)
+                boxes.extend(matched_boxes)
+            boxes = sorted(boxes, key=lambda candidate_box: float(candidate_box.confidence or 0), reverse=True)
+            if limit > 0:
+                boxes = boxes[:limit]
+            return sort_boxes(boxes)
         if box is not None:
             search_x1 = max(box.x, 0)
             search_y1 = max(box.y, 0)
@@ -255,19 +458,11 @@ class FeatureSet:
             search_y1 = 0
             search_y2, search_x2 = mat.shape[:2]
         else:
-            x_offset = self.width * horizontal_variance
-            y_offset = self.height * vertical_variance
-            if feature.scaling != 1:
-                if horizontal_variance == 0:
-                    x_offset = 1
-                if vertical_variance == 0:
-                    y_offset = 1
-
-            search_x1 = max(0, round(feature.x - x_offset))
-            search_y1 = max(0, round(feature.y - y_offset))
-            feature_width, feature_height = feature.width, feature.height
-            search_x2 = min(self.width, round(feature.x + feature_width + x_offset))
-            search_y2 = min(self.height, round(feature.y + feature_height + y_offset))
+            search_box = self._feature_search_box(feature, horizontal_variance, vertical_variance)
+            search_x1 = search_box.x
+            search_y1 = search_box.y
+            search_x2 = search_box.x + search_box.width
+            search_y2 = search_box.y + search_box.height
 
         search_area = mat[search_y1:search_y2, search_x1:search_x2, :3]
         prepare_time = time.time()
@@ -447,14 +642,19 @@ def read_from_json(coco_json, width=-1, height=-1, hcenter_features=None, vcente
         if target_category_name and image_id not in target_image_ids:
             continue
         image_key = (image_key_prefix, os.path.abspath(coco_json), image_id)
-        if processed_images and image_key in processed_images:
+        if processed_images and image_key in processed_images and not target_category_name:
             loaded_image_keys.add(image_key)
             continue
         image_path = str(os.path.join(coco_folder, file_name))
         if ok_compressed is None:
             with Image.open(image_path) as img:
                 ok_compressed = 'ok_compressed' in img.info.keys()
-        whole_image = cv2.imread(image_path)
+        if any(ord(ch) > 127 for ch in image_path):
+            whole_image = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_COLOR)
+        else:
+            whole_image = cv_imread(image_path)
+        if whole_image is None:
+            whole_image = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), cv2.IMREAD_COLOR)
         if whole_image is None:
             logger.error(f'Could not read image {image_path}')
             raise ValueError(f'Could not read image {image_path}')
@@ -464,6 +664,9 @@ def read_from_json(coco_json, width=-1, height=-1, hcenter_features=None, vcente
 
         for annotation in annotations_by_image.get(image_id, []):
             category_id = annotation['category_id']
+            category_name = category_map[category_id]
+            if target_category_name and category_name != target_category_name:
+                continue
             bbox = annotation['bbox']
             x, y, w, h = bbox
 
@@ -471,8 +674,6 @@ def read_from_json(coco_json, width=-1, height=-1, hcenter_features=None, vcente
 
             x, y = round(x), round(y)
             h, w, _ = image.shape
-
-            category_name = category_map[category_id]
 
             is_hcenter = 'hcenter' in category_name or (hcenter_features and category_name in hcenter_features)
             is_vcenter = 'vcenter' in category_name or (vcenter_features and category_name in vcenter_features)
@@ -494,14 +695,20 @@ def read_from_json(coco_json, width=-1, height=-1, hcenter_features=None, vcente
                 if existing_box.x == x and existing_box.y == y and existing_box.width == image.shape[
                     1] and existing_box.height == image.shape[0]:
                     continue
-                raise ValueError(f"Multiple boxes found for category {category_name}")
+                alternative_features = getattr(feature_dict[category_name], "alternative_features", None)
+                if alternative_features is None:
+                    alternative_features = []
+                    setattr(feature_dict[category_name], "alternative_features", alternative_features)
+                alternative_features.append(Feature(image, x, y, scale))
+                logger.warning(f"Multiple boxes found for category {category_name}; keeping as alternative local sample")
+                continue
             feature_dict[category_name] = Feature(image, x, y, scale)
             box_dict[category_name] = Box(x, y, image.shape[1], image.shape[0], name=category_name)
 
     return feature_dict, box_dict, ok_compressed, load_success, loaded_image_keys
 
 def load_json(coco_json):
-    with open(coco_json, 'r') as file:
+    with open(coco_json, 'r', encoding='utf-8-sig') as file:
         data = json.load(file)
         for images in data['images']:
             images['file_name'] = un_fk_label_studio_path(images['file_name'])
@@ -685,8 +892,8 @@ def compress_copy_coco(coco_json, target_folder, image_folder, generate_label_en
         annotation['bbox'] = [round(bbox[0]), round(bbox[1]), w, h]
         annotation['area'] = w * h
 
-    with open(target_coco_json, 'w') as json_file:
-        json.dump(data, json_file, indent=4)
+    with open(target_coco_json, 'w', encoding='utf-8') as json_file:
+        json.dump(data, json_file, indent=4, ensure_ascii=False)
 
     logger.info(f'Copied COCO JSON to: {target_coco_json}')
 
@@ -751,7 +958,7 @@ def compress_coco(coco_json, previous_data=None) -> None:
         h = img_info.get('height')
         
         if w is None or h is None:
-            tmp_img = cv2.imread(img_path)
+            tmp_img = cv_imread(img_path)
             if tmp_img is not None:
                 h, w = tmp_img.shape[:2]
                 img_info['width'] = w
@@ -821,7 +1028,7 @@ def compress_coco(coco_json, previous_data=None) -> None:
             for img_id in page['image_ids']:
                 img_info = image_info_map[img_id]
                 src_path = os.path.join(coco_folder, img_info['file_name'])
-                src_img = cv2.imread(src_path)
+                src_img = cv_imread(src_path)
 
                 if src_img is None:
                     continue
@@ -861,7 +1068,7 @@ def compress_coco(coco_json, previous_data=None) -> None:
         for img_id in item['image_ids']:
             image_info_map[img_id]['file_name'] = item['final_rel']
 
-    with open(coco_json, 'w') as f:
+    with open(coco_json, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
     for item in new_files:

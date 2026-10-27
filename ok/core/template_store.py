@@ -40,7 +40,7 @@ class CocoTemplateStore:
             if not self.coco_path.is_file():
                 return {key: list(value) for key, value in EMPTY_COCO.items()}
             try:
-                data = json.loads(self.coco_path.read_text(encoding="utf-8"))
+                data = json.loads(self.coco_path.read_text(encoding="utf-8-sig"))
             except (OSError, ValueError):
                 return {key: list(value) for key, value in EMPTY_COCO.items()}
             return {
@@ -78,8 +78,8 @@ class CocoTemplateStore:
         return max((int(item.get("id", 0)) for item in items), default=0) + 1
 
     def _dimensions(self, path):
-        import cv2
-        frame = cv2.imread(str(path))
+        from ok.util.image_io import cv_imread
+        frame = cv_imread(str(path))
         if frame is None:
             return 0, 0
         height, width = frame.shape[:2]
@@ -218,10 +218,10 @@ class CocoTemplateStore:
             return f"{index}.png"
 
     def save_frame(self, frame):
-        import cv2
+        from ok.util.image_io import cv_imwrite
         with self._lock:
             path = self.image_path(self.next_image_name())
-            if not cv2.imwrite(str(path), frame):
+            if not cv_imwrite(str(path), frame):
                 raise RuntimeError("Failed to save template image")
             data = self.load()
             self.ensure_image(data, path)

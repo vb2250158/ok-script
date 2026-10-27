@@ -1,0 +1,29 @@
+# 录屏与标注模板
+
+本分支在官方 `ok-oldking/ok-script` 的 `master` 上增加录屏与标注工具。
+桌面界面左侧的「录屏模板」页面包含「录屏」和「编辑录屏模板」两个标签页。
+
+## 使用
+
+1. 用项目原有配置启动 Qt 界面，在「Capture」页选择窗口并启动画面采集。
+2. 打开「录屏模板 → 录屏」，开始录制，完成操作后停止。视频和点击、拖拽事件保存在 `recordings/video_templates/`。
+3. 在「编辑录屏模板」中打开录屏包，执行图像识别加工，或选取当前画面作为关键帧。OCR 使用项目的 `ocr` 配置；未配置时会显示错误，已有视频和标注仍可打开。
+4. 检查关键帧，调整标注框与模板名，确认后导出模板列表。导出目标沿用 `template_matching.coco_feature_json` 配置。
+5. 在原有「Templates」页重新打开模板，核对图片和 COCO 标注。录屏包也可以单独导出已确认的素材。
+
+例如，使用现有项目配置启动：
+
+```powershell
+python -m ok gui --config my_project.config:config
+```
+
+普通模板、多样本规则模板、匹配预览、分组、标注撤销与重做、Agent 辅助标注提示词均沿用原有实现。录屏包格式保持兼容。
+
+## 分支维护
+
+- `codex/screen-recording-annotation`：录屏、关键帧、OCR、标注编辑、模板导出与匹配。
+- `private/panghu-local`：保留原有行为树和可视化流程开发历史。
+- 新分支基于官方 `upstream/master` 的 `dac12d4`，不包含行为树运行时、流程编辑器及录屏转流程入口。
+- 录屏素材与项目模板属于本地数据，不纳入此分支的源代码提交。
+
+Qt 模块使用 `ok.ui.qt.video_template` 路径；原有 `ok.gui` Qt 兼容入口继续由框架提供。

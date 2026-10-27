@@ -76,6 +76,44 @@ def get_relative_path(*files):
     return normalized_path
 
 
+def workspace_path_candidates(path, config=None, extra_bases=None):
+    """Return absolute candidates for a path stored in app config."""
+    if not path:
+        return []
+    path = os.path.normpath(str(path))
+    if os.path.isabs(path):
+        return [path]
+
+    bases = []
+    config = config or {}
+    for base in extra_bases or []:
+        if base and base not in bases:
+            bases.append(base)
+    for key in ("resolved_working_directory",):
+        base = config.get(key) if isinstance(config, dict) else None
+        if base and base not in bases:
+            bases.append(base)
+    cwd = os.getcwd()
+    if cwd and cwd not in bases:
+        bases.append(cwd)
+    for key in ("project_root",):
+        base = config.get(key) if isinstance(config, dict) else None
+        if base and base not in bases:
+            bases.append(base)
+
+    return [os.path.normpath(os.path.join(base, path)) for base in bases]
+
+
+def resolve_workspace_path(path, config=None, extra_bases=None, must_exist=False):
+    candidates = workspace_path_candidates(path, config=config, extra_bases=extra_bases)
+    if not candidates:
+        return path
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+    return "" if must_exist else candidates[0]
+
+
 def install_path_isascii():
     path = get_path_relative_to_exe('')
 

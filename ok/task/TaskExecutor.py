@@ -8,6 +8,7 @@ from ok.core.events import communicate
 from ok.core.notifications import alert_info
 from ok.task.exceptions import FinishedException, TaskDisabledException, WaitFailedException, CaptureException, \
     HotkeyConfigException, ExecutorBusyException
+from ok.task.ocr_errors import OCRUnavailableError
 from ok.util.GlobalConfig import basic_options
 from ok.util.logger import Logger, config_logger
 from ok.util.process import is_cuda_12_or_above, prevent_sleeping
@@ -95,9 +96,9 @@ class TaskExecutor:
         self._snapshot_enabled = False
         self._frame_snapshot = None
         self.paused = True
-        self.config = config
+        self.config = config or {}
         self.scene = None
-        self.locale = config.get("locale", "en_US")
+        self.locale = self.config.get("locale", "en_US")
         self.text_fix = {}
         self.ocr_po_translation = None
         self.load_tr()
@@ -204,7 +205,16 @@ class TaskExecutor:
             logger.error(f'init default ocr error, cost: {time.time() - start:.2f}s', e)
 
     def _create_ocr_lib(self, name):
-        ocr_config = self.config.get('ocr').get(name)
+        all_ocr_config = self.config.get('ocr')
+        if not isinstance(all_ocr_config, dict):
+            raise OCRUnavailableError(
+                "OCR is not configured. Add config['ocr']['default'] with an OCR lib such as 'rapidocr'."
+            )
+        ocr_config = all_ocr_config.get(name)
+        if not isinstance(ocr_config, dict) and name == "default" and all_ocr_config.get("lib"):
+            ocr_config = all_ocr_config
+        if not isinstance(ocr_config, dict) or not ocr_config.get('lib'):
+            raise OCRUnavailableError(f"OCR config for '{name}' is missing a 'lib' value.")
         lib = ocr_config.get('lib')
         to_download = ocr_config.get('download_models')
         if to_download:
@@ -219,7 +229,12 @@ class TaskExecutor:
             config_params = dict(config_params)
         if lib == 'paddleocr':
             logger.info('use paddleocr as ocr lib')
-            from paddleocr import PaddleOCR
+            try:
+                from paddleocr import PaddleOCR
+            except ModuleNotFoundError as exc:
+                raise OCRUnavailableError(
+                    "OCR library 'paddleocr' is not installed. Install paddleocr or choose another OCR lib."
+                ) from exc
             config_params['use_textline_orientation'] = False
             config_params['use_doc_unwarping'] = False
             config_params['use_doc_orientation_classify'] = False
@@ -232,22 +247,42 @@ class TaskExecutor:
         elif lib == 'dgocr':
             if config_params.get('use_dml', True):
                 config_params['use_dml'] = True
-            from dgocr import DGOCR
+            try:
+                from dgocr import DGOCR
+            except ModuleNotFoundError as exc:
+                raise OCRUnavailableError(
+                    "OCR library 'dgocr' is not installed. Install dgocr or choose another OCR lib."
+                ) from exc
             ocr_lib = DGOCR(**config_params)
         elif lib == 'onnxocr':
-            from onnxocr.onnx_paddleocr import ONNXPaddleOcr
+            try:
+                from onnxocr.onnx_paddleocr import ONNXPaddleOcr
+            except ModuleNotFoundError as exc:
+                raise OCRUnavailableError(
+                    "OCR library 'onnxocr' is not installed. Install onnxocr or choose another OCR lib."
+                ) from exc
             logger.info(f'init onnxocr {config_params}')
             ocr_lib = ONNXPaddleOcr(use_angle_cls=False,
                                     logger=logger,
                                     use_npu=config_params.get('use_npu', True),
                                     use_openvino=config_params.get('use_openvino', False))
         elif lib == 'rapidocr':
-            from rapidocr import RapidOCR
+            try:
+                from rapidocr import RapidOCR
+            except ModuleNotFoundError as exc:
+                raise OCRUnavailableError(
+                    "OCR library 'rapidocr' is not installed. Install rapidocr or choose another OCR lib."
+                ) from exc
             params = {"Global.use_cls": False, "Global.max_side_len": 100000, "Global.min_side_len": 0,
                       "EngineConfig.onnxruntime.use_dml": False}
             params.update(config_params)
             logger.info(f'init rapidocr {params}')
-            ocr_lib = RapidOCR(params=params)
+            try:
+                ocr_lib = RapidOCR(params=params)
+            except ImportError as exc:
+                raise OCRUnavailableError(
+                    "OCR engine dependency for 'rapidocr' is not installed. Install onnxruntime or choose another OCR lib."
+                ) from exc
         else:
             raise Exception(f'ocr lib not supported: {lib}')
         logger.info(f'ocr_lib init {ocr_lib} {lib}')

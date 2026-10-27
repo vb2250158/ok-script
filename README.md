@@ -1,5 +1,7 @@
 # ok-script
 
+本分支提供独立的[录屏与标注模板工具](docs/screen-recording.md)，用于录屏、提取关键帧、编辑标注及导出 COCO 模板。
+
 ## 无界面与桌面模式
 
 自动化核心现已与 Qt 解耦。使用 `ok-script` 可无界面运行，使用

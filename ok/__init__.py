@@ -1,5 +1,6 @@
 # __init__.py
 import hashlib
+import json
 import importlib
 import logging
 import os
@@ -13,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from ok.util.handler import Handler, ExitEvent
 from ok.util.logger import Logger
-from ok.util.file import get_path_relative_to_exe
+from ok.util.file import get_path_relative_to_exe, resolve_workspace_path
 from ok.core.ui_config import resolve_ui_config, resolve_window_size
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
@@ -673,6 +674,7 @@ class OK:
                 raise RuntimeError(
                     'Another application instance is still running and could not be stopped safely.')
         og.ok = self
+        self._apply_working_directory(config)
         if pyappify.app_version:
             config['version'] = pyappify.app_version
         if pyappify.app_profile:
@@ -733,6 +735,58 @@ class OK:
             logger.error(f'__init__ error', e)
             self.quit()
             raise e
+
+    def _apply_working_directory(self, config):
+        """Apply an optional per-app workspace without assuming a specific project."""
+        original_cwd = os.getcwd()
+        working_directory = self._configured_working_directory(config)
+        config["project_root"] = original_cwd
+        if not working_directory:
+            config["resolved_working_directory"] = original_cwd
+            return
+
+        if os.path.isabs(working_directory):
+            resolved = os.path.abspath(working_directory)
+        else:
+            resolved = os.path.abspath(os.path.join(original_cwd, working_directory))
+
+        os.makedirs(resolved, exist_ok=True)
+        if original_cwd not in sys.path:
+            sys.path.insert(0, original_cwd)
+        os.chdir(resolved)
+        config["resolved_working_directory"] = resolved
+
+    def _configured_working_directory(self, config):
+        working_directory = str(config.get("working_directory") or "").strip()
+        working_directory_config = config.get("working_directory_config")
+        if not isinstance(working_directory_config, dict):
+            return working_directory
+
+        folder = working_directory_config.get("folder")
+        name = working_directory_config.get("name")
+        key = working_directory_config.get("key")
+        if not folder or not name or not key:
+            return working_directory
+
+        config_file = os.path.join(folder, f"{name}.json")
+        try:
+            with open(config_file, "r", encoding="utf-8") as file:
+                data = json.load(file)
+            if isinstance(data, dict) and key in data:
+                return str(data.get(key) or "").strip()
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            logger.warning(f"Failed to read working directory config {config_file}: {e}")
+
+        if "default" in working_directory_config:
+            return str(working_directory_config.get("default") or "").strip()
+        return working_directory
+
+    def _resolve_configured_workspace_path(self, path):
+        if not path:
+            return path
+        return resolve_workspace_path(path, self.config)
 
     @property
     def app(self):
@@ -1062,6 +1116,7 @@ class OK:
         template_matching = self.config.get('template_matching')
         if template_matching is not None:
             coco_feature_json = self.config.get('template_matching').get('coco_feature_json')
+            coco_feature_json = self._resolve_configured_workspace_path(coco_feature_json)
             self.feature_set = FeatureSet(self.debug, coco_feature_json,
                                           default_horizontal_variance=template_matching.get(
                                               'default_horizontal_variance', 0.002),
@@ -1076,14 +1131,17 @@ class OK:
             isascii, path = install_path_isascii()
             ocr_target_height = ocr.get('target_height', 0)
             if not isascii:
-                logger.info(f'show_path_ascii_error')
-                self.init_error = True
-                if self.should_init_task_manager_headless():
-                    raise RuntimeError(f'Install dir {path} must be an English path, move to another path.')
+                if self.config.get('allow_non_ascii_path'):
+                    logger.warning(f'Install dir contains non-ASCII characters, continuing by config: {path}')
                 else:
-                    self.app.show_path_ascii_error(path)
-                    self.app.exec()
-                return False
+                    logger.info(f'show_path_ascii_error')
+                    self.init_error = True
+                    if self.should_init_task_manager_headless():
+                        raise RuntimeError(f'Install dir {path} must be an English path, move to another path.')
+                    else:
+                        self.app.show_path_ascii_error(path)
+                        self.app.exec()
+                    return False
 
         self.task_executor = TaskExecutor(self.device_manager, exit_event=self.exit_event,
                                           wait_until_settle_time=self.config.get('wait_until_settle_time', 1),

@@ -4,6 +4,7 @@ from time import perf_counter
 from typing import TypedDict
 
 import cv2
+from ok.util.image_io import cv_imread, cv_imwrite
 from PySide6.QtCore import Qt, Signal, QTimer, QRunnable, QThreadPool, QObject
 from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
@@ -14,6 +15,7 @@ from qfluentwidgets import (PushButton, PrimaryPushButton, FluentIcon,
 from ok.ui.qt.util.touch_scroll import enable_touch_scrolling
 
 from ok import Config, og
+from ok.util.file import resolve_workspace_path
 from ok.core.template_store import CocoTemplateStore, filename_key
 from ok.ui.qt.common.design_system import configure_page_layout
 from ok.ui.qt.util.windows_thumbnail import WindowsThumbnailReader
@@ -67,11 +69,40 @@ class ImageItem(TypedDict):
 
 
 def ensure_template_folder():
-    return str(CocoTemplateStore(os.path.join(os.getcwd(), TEMPLATE_FOLDER)).folder)
+    return str(_template_store().folder)
 
 
 def get_coco_path():
+    configured_path = _configured_coco_path()
+    if configured_path:
+        ensure_template_folder()
+        return configured_path
     return os.path.join(ensure_template_folder(), COCO_JSON)
+
+
+def _configured_coco_path():
+    template_matching = getattr(og, "config", {}).get("template_matching") if getattr(og, "config", None) else None
+    if not isinstance(template_matching, dict):
+        return None
+    coco_path = str(template_matching.get("coco_feature_json") or "").strip()
+    if not coco_path:
+        return None
+    return resolve_workspace_path(coco_path, getattr(og, "config", None))
+
+
+def _configured_template_folder():
+    coco_path = _configured_coco_path()
+    if coco_path:
+        return os.path.dirname(coco_path)
+    return os.path.join(os.getcwd(), TEMPLATE_FOLDER)
+
+
+def _template_store():
+    coco_path = _configured_coco_path()
+    return CocoTemplateStore(
+        _configured_template_folder(),
+        coco_name=os.path.basename(coco_path) if coco_path else COCO_JSON,
+    )
 
 
 def _filename_key(file_name):
@@ -80,22 +111,26 @@ def _filename_key(file_name):
 
 
 def load_coco() -> CocoData:
-    return CocoTemplateStore(os.path.join(os.getcwd(), TEMPLATE_FOLDER)).load()
+    return _template_store().load()
 
 
 def save_coco(coco_data):
-    CocoTemplateStore(os.path.join(os.getcwd(), TEMPLATE_FOLDER)).save(coco_data)
+    _template_store().save(coco_data)
 
 
 def get_image_files():
     """Get all image files sorted by creation time descending."""
-    store = CocoTemplateStore(os.path.join(os.getcwd(), TEMPLATE_FOLDER))
+    store = _template_store()
     return [str(item['path']) for item in store.list_images()]
 
 
 def get_next_image_name(folder, coco_data=None):
-    """Find the next available numeric image name."""
-    return os.path.splitext(CocoTemplateStore(folder).next_image_name())[0]
+    """Find the next available numeric image name, including configured COCO entries."""
+    coco_path = _configured_coco_path()
+    coco_name = COCO_JSON
+    if coco_path and os.path.normcase(os.path.abspath(folder)) == os.path.normcase(os.path.dirname(coco_path)):
+        coco_name = os.path.basename(coco_path)
+    return os.path.splitext(CocoTemplateStore(folder, coco_name=coco_name).next_image_name())[0]
 
 
 def get_image_entry_for_path(coco_data, image_path):
@@ -190,7 +225,7 @@ def _card_style(selected, dark):
 
 
 def save_template_screenshot():
-    """Capture a frame and save it to ok_templates.
+    """Capture a frame and save it to the configured template folder.
 
     Returns the saved path, or None when no frame could be captured.
     """
@@ -207,7 +242,7 @@ def save_template_screenshot():
 
     folder = ensure_template_folder()
     file_path = os.path.join(folder, f"{get_next_image_name(folder)}.png")
-    if not cv2.imwrite(file_path, frame):
+    if not cv_imwrite(file_path, frame):
         raise RuntimeError(f"Could not write screenshot to {file_path}")
     return file_path
 
@@ -835,7 +870,7 @@ class TemplateTab(QWidget):
         self.center_screenshot_btn.setEnabled(mutations_enabled)
 
     def take_screenshot(self):
-        """Capture a frame in the background and save it to ok_templates."""
+        """Capture a frame in the background and save it to the configured template folder."""
         if self._capturing:
             return
         if og.device_manager.capture_method is None:
@@ -877,7 +912,7 @@ class TemplateTab(QWidget):
                 return  # Already exists
 
         # Read image dimensions
-        img = cv2.imread(image_path)
+        img = cv_imread(image_path)
         if img is not None:
             h, w = img.shape[:2]
         else:

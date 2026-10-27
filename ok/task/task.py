@@ -12,6 +12,7 @@ from ok.feature.Box import find_boxes_by_name, find_boxes_within_boundary, Box, 
     sort_boxes, find_highest_confidence_box
 from ok.feature.FeatureSet import adjust_coordinates, resize_image, scale_box, join_list_elements
 from ok.task.exceptions import HotkeyConfigException
+from ok.task.ocr_errors import OCRUnavailableError
 from ok.util.color import calculate_color_percentage
 from ok.util.config import Config
 from ok.util.explorer import reveal_in_explorer
@@ -819,7 +820,7 @@ class OCR(FindFeature):
         return sort_boxes(detected_boxes)
 
     def ocr_fun(self, lib):
-        lib_name = self.executor.config.get('ocr').get(lib).get('lib')
+        lib_name = self.ocr_config(lib).get('lib')
         if lib_name == 'paddleocr':
             return self.paddle_ocr
         elif lib_name == 'dgocr':
@@ -828,6 +829,20 @@ class OCR(FindFeature):
             return self.onnx_ocr
         else:
             return self.rapid_ocr
+
+    def ocr_config(self, lib):
+        executor_config = getattr(self.executor, "config", None) or {}
+        ocr_config = executor_config.get("ocr") if isinstance(executor_config, dict) else None
+        if not isinstance(ocr_config, dict):
+            raise OCRUnavailableError(
+                "OCR is not configured. Add config['ocr']['default'] with an OCR lib such as 'rapidocr'."
+            )
+        lib_config = ocr_config.get(lib)
+        if not isinstance(lib_config, dict) and lib == "default" and ocr_config.get("lib"):
+            lib_config = ocr_config
+        if not isinstance(lib_config, dict) or not lib_config.get("lib"):
+            raise OCRUnavailableError(f"OCR config for '{lib}' is missing a 'lib' value.")
+        return lib_config
 
     def fix_match_regex(self, match):
         if match and self.executor.ocr_po_translation:

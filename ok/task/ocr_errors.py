@@ -1,0 +1,2 @@
+class OCRUnavailableError(RuntimeError):
+    pass

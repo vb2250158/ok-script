@@ -14,6 +14,7 @@ from qfluentwidgets import (PushButton, PrimaryPushButton, FluentIcon,
 
 from ok.ui.qt.tasks.TemplateTab import (load_coco, save_coco, get_image_entry_for_path)
 from ok.ui.qt.widget.BaseWindow import BaseWindow
+from ok.util.image_io import cv_imread
 from ok.util.logger import Logger
 
 logger = Logger.get_logger(__name__)
@@ -1134,8 +1135,7 @@ class MarkUpWindow(BaseWindow):
             image_id = 1
             while image_id in existing_ids:
                 image_id += 1
-            import cv2
-            img = cv2.imread(image_path)
+            img = cv_imread(image_path)
             h, w = (img.shape[:2]) if img is not None else (0, 0)
             self.coco_data['images'].append({
                 'id': image_id,

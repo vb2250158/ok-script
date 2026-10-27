@@ -174,6 +174,11 @@ class MainWindow(FluentWindow):
                                      position=NavigationItemPosition.SCROLL)
                 self.grouped_task_tabs.append(group_tab)
 
+        from ok.ui.qt.tasks.VideoTemplateTab import VideoTemplateTab
+        self.video_template_tab = VideoTemplateTab(config=config)
+        self.addSubInterface(self.video_template_tab, FluentIcon.CAMERA, self.tr('录屏模板'),
+                             position=NavigationItemPosition.SCROLL)
+
         # Add custom tabs that should appear after built-in task tabs
         for tab_obj in after_custom_tabs:
             self.addSubInterface(tab_obj, tab_obj.icon, self.app.tr(tab_obj.name), position=tab_obj.position)

@@ -4,6 +4,9 @@ models
 out
 fonts
 configs/
+/recordings/
+/ok_templates/
+/_work/
 # Byte-compiled / optimized / DLL files
 .idea/
 __pycache__/
