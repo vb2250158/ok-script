@@ -1,4 +1,8 @@
 ## Config.py
+import os
+import shutil
+import time
+
 from ok.util.file import get_relative_path, read_json_file, write_json_file
 from ok.util.logger import Logger
 
@@ -37,9 +41,14 @@ class Config(dict):
             folder = self.config_folder
         self.config_file = get_relative_path(folder, f"{name}.json")
 
-        # Read the config file, if it exists, otherwise use default
+        # Read the config file, if it exists, otherwise use default.
+        # Missing file and unreadable JSON both yield None from read_json_file;
+        # only an existing unreadable file is backed up before reset so user
+        # data is never overwritten without a recoverable .corrupt-<ts> copy.
         config = read_json_file(self.config_file)
         if config is None:
+            if os.path.exists(self.config_file):
+                self._backup_corrupt_config()
             self.reset_to_default()
         else:
             super().__init__()
@@ -56,6 +65,16 @@ class Config(dict):
             write_json_file(self.config_file, self)
         except Exception as e:
             logger.error(f'save_file error: {e}')
+
+    def _backup_corrupt_config(self):
+        """Preserve an unreadable config before reset_to_default overwrites it."""
+        timestamp = time.strftime('%Y%m%d-%H%M%S')
+        backup_path = f'{self.config_file}.corrupt-{timestamp}'
+        try:
+            shutil.copy2(self.config_file, backup_path)
+            logger.error(f'corrupt config backed up to {backup_path}')
+        except OSError as e:
+            logger.error(f'corrupt config backup failed for {self.config_file}: {e}')
 
     def get_default(self, key):
         return self.default.get(key)
