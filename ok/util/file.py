@@ -13,7 +13,10 @@ def read_json_file(file_path) -> dict | None:
         return None
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        # utf-8-sig accepts plain UTF-8 and UTF-8-with-BOM. Windows editors and
+        # PowerShell often write BOM; decoding as utf-8 then treated the file as
+        # missing and Config reset_to_default wiped user lists (e.g. Saved Accounts).
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
             data = json.load(f)
         return data
     except json.JSONDecodeError:
