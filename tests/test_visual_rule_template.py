@@ -204,10 +204,14 @@ def test_feature_set_missing_feature_does_not_rebuild_after_full_load():
             self.visual_rule_dict = {}
             self.lock = threading.Lock()
             self._visual_rule_source_fingerprint = None
+            self._missing = {}
             self.calls = []
 
         def _refresh_if_visual_rule_sources_changed(self):
             pass
+
+        def _source_signature(self):
+            return ()
 
         def process_data(self, feature_name=None):
             self.calls.append(feature_name)
@@ -220,7 +224,7 @@ def test_feature_set_missing_feature_does_not_rebuild_after_full_load():
     feature_set.ensure_feature("Missing")
     feature_set.ensure_feature("Missing")
 
-    assert feature_set.calls == ["Missing", None, "Missing"]
+    assert feature_set.calls == ["Missing", None]
 
 
 def test_feature_set_duplicate_template_name_searches_alternative_local_samples(tmp_path):
@@ -1779,3 +1783,24 @@ def _write_rule_coco(coco_path, image_name, second_category_name):
             {"id": 2, "name": second_category_name, "supercategory": ""},
         ],
     }, ensure_ascii=False), encoding="utf-8")
+
+
+def test_visual_rules_load_from_upstream_split_template_samples(tmp_path):
+    from ok.feature.FeatureSet import generate_templates
+
+    source = tmp_path / "source"
+    source.mkdir()
+    image = np.zeros((80, 120, 3), dtype=np.uint8)
+    _draw_rule_sample(image, 5, (255, 80, 80))
+    _draw_rule_sample(image, 65, (80, 120, 255))
+    image_path = source / "screen.png"
+    assert cv2.imwrite(str(image_path), image)
+    coco_path = source / "coco_annotations.json"
+    _write_rule_coco(coco_path, image_path.name, "TaskIcon_B")
+    crops = generate_templates(str(coco_path), str(tmp_path / "templates"))
+    feature_set = FeatureSet(False, None, 1, 1, template_folder=str(crops))
+    feature_set.check_size(image)
+
+    assert "TaskIcon" in feature_set.template_names()
+    assert feature_set.visual_rule_dict["TaskIcon"].sample_names == ["TaskIcon_A", "TaskIcon_B"]
+    assert feature_set.get_feature_by_name(image, "TaskIcon") is not None

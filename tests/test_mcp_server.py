@@ -1,6 +1,7 @@
 import asyncio
 import json
 import errno
+import logging
 import os
 import socket
 import threading
@@ -12,7 +13,18 @@ import pytest
 
 from ok.core.mcp_server import LocalMcpServer, bind_mcp_socket, create_mcp_app, discover_mcp_servers
 from ok.util.handler import ExitEvent
+from ok.util.logger import SafeFileHandler
 from test_mcp_runner import development, write_task, register_task
+
+
+@pytest.mark.parametrize('options,expected', [({}, 7), ({'retention_days': 0}, 0), ({'retention_days': 2}, 2)])
+def test_server_passes_artifact_retention_to_runner(development, options, expected):
+    dev = development
+    runtime = SimpleNamespace(task_executor=dev.executor, screenshot=dev.screens,
+                              headless_app=dev.app, should_init_task_manager_headless=lambda: True)
+    server = LocalMcpServer(runtime, {'artifact_directory': str(dev.root / 'http'), **options})
+    assert server.runner.retention_days == expected
+    server.runner.close()
 
 
 @pytest.mark.parametrize('mode', ['auto', 'legacy'])
@@ -134,6 +146,29 @@ def test_http_connection_and_tools_end_to_end(development, mode, monkeypatch):
     assert discover_mcp_servers(dev.root, artifact_directory='http') == []
 
 
+def test_start_keeps_existing_file_log_open(development, tmp_path):
+    pytest.importorskip('mcp')
+    dev = development
+    runtime = SimpleNamespace(task_executor=dev.executor, screenshot=dev.screens,
+                              headless_app=dev.app, exit_event=ExitEvent(),
+                              should_init_task_manager_headless=lambda: True)
+    server = LocalMcpServer(runtime, {'port': 0, 'artifact_directory': str(dev.root / 'http')})
+    # The application configures ok-script.log before it starts the MCP server.
+    log_file = tmp_path / 'ok-script.log'
+    handler = SafeFileHandler(log_file, when='midnight', encoding='utf-8')
+    ok_logger = logging.getLogger('ok')
+    ok_logger.addHandler(handler)
+    try:
+        server.start()
+        ok_logger.warning('logged after MCP start')
+    finally:
+        ok_logger.removeHandler(handler)
+        handler.close()
+        server.stop()
+        server.join()
+    assert 'logged after MCP start' in log_file.read_text(encoding='utf-8')
+
+
 def test_exit_request_is_idempotent_and_does_not_wait_for_runner(development, monkeypatch):
     dev = development
     runtime = SimpleNamespace(task_executor=dev.executor, screenshot=dev.screens,
@@ -237,11 +272,11 @@ server.join()
             child.communicate(timeout=10)
 
 
-def test_missing_optional_sdk_has_install_instructions(monkeypatch):
+def test_missing_required_sdk_has_repair_instructions(monkeypatch):
     import sys
     monkeypatch.setitem(sys.modules, 'mcp', None)
     monkeypatch.setitem(sys.modules, 'mcp.server', None)
-    with pytest.raises(RuntimeError, match=r'ok-script\[mcp\]'):
+    with pytest.raises(RuntimeError, match='required MCP dependency'):
         create_mcp_app(None, 'test-token', 8765)
 
 

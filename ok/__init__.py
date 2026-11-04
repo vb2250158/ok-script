@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 from ok.util.handler import Handler, ExitEvent
 from ok.util.logger import Logger
 from ok.util.file import get_path_relative_to_exe, resolve_workspace_path
-from ok.core.ui_config import resolve_ui_config, resolve_window_size
+from ok.core.ui_config import resolve_gui_icon, resolve_ui_config, resolve_window_size
 os.environ["PYTHONIOENCODING"] = "utf-8"
 
 if TYPE_CHECKING:
@@ -334,7 +334,7 @@ class App(_OverlayConfigMixin):
         self.overlay_window = None
         self.main_window = None
         self.exit_event = exit_event
-        self.icon = QIcon(get_path_relative_to_exe(config.get('gui_icon')) or ":/icon/icon.ico")
+        self.icon = QIcon(get_path_relative_to_exe(resolve_gui_icon(config)))
 
         from ok.core.start_controller import StartController
         self.start_controller = StartController(self.config, exit_event)
@@ -655,6 +655,7 @@ class OK:
         import pyappify
         from ok.util.config import Config
 
+        config['gui_icon'] = resolve_gui_icon(config)
         self.config = config
         check_mutex_fn = _resolve('check_mutex')
         config_logger_fn = _resolve('config_logger')
@@ -1125,7 +1126,8 @@ class OK:
                                           default_threshold=template_matching.get('default_threshold', 0.8),
                                           feature_processor=template_matching.get('feature_processor'),
                                           hcenter_features=template_matching.get('hcenter_features'),
-                                          vcenter_features=template_matching.get('vcenter_features'))
+                                          vcenter_features=template_matching.get('vcenter_features'),
+                                          template_folder=template_matching.get('template_folder', os.path.join('assets', 'templates')))
         ocr_target_height = 0
         if ocr := self.config.get('ocr'):
             isascii, path = install_path_isascii()

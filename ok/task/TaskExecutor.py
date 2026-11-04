@@ -16,6 +16,9 @@ from ok.util.window import ratio_text_to_number
 
 logger = Logger.get_logger(__name__)
 
+# How long next_frame() waits for another caller to finish its capture request.
+NEXT_FRAME_BUSY_WAIT = 0.1
+
 
 class ExecutorJob:
     """A callable that runs once on the executor thread, outside the task queue.
@@ -356,7 +359,13 @@ class TaskExecutor:
             if time_out is not None and time.time() - start >= time_out:
                 return None
             if self.can_capture():
-                frame = self.method.get_frame()
+                # A one-off capture on another thread (debug screenshot,
+                # template capture) owns the request for about one frame.
+                # Waiting for it is far cheaper than the retry sleep below.
+                busy_wait = NEXT_FRAME_BUSY_WAIT
+                if time_out is not None:
+                    busy_wait = min(busy_wait, max(0, time_out - (time.time() - start)))
+                frame = self.method.get_frame(busy_wait=busy_wait)
                 if frame is not None:
                     height, width = frame.shape[:2]
                     if height <= 0 or width <= 0:
@@ -676,8 +685,8 @@ class TaskExecutor:
                 pre_action()
             self.next_frame()
             result = condition()
-            result_str = list_or_obj_to_str(result)
             if result:
+                result_str = list_or_obj_to_str(result)
                 if settle_time == -1:
                     settle_time = self.wait_until_settle_time
                 if settle_time > 0:
@@ -833,8 +842,6 @@ class TaskExecutor:
                     if self.next_frame(time_out=4) is None and is_trigger_task:
                         logger.info("no frame available, skip remaining trigger tasks")
                         self.trigger_task_index = len(self.trigger_tasks) - 1
-                        self.current_task = None
-                        task.running = False
                         continue
                 if is_trigger_task:
                     if task.run():
@@ -843,10 +850,12 @@ class TaskExecutor:
                         continue
                 else:
                     prevent_sleeping(True)
-                    logger.debug(f'start running onetime_task {task.name}')
-                    task.run()
-                    logger.debug(f'end running onetime_task {task.name}')
-                    prevent_sleeping(False)
+                    try:
+                        logger.debug(f'start running onetime_task {task.name}')
+                        task.run()
+                        logger.debug(f'end running onetime_task {task.name}')
+                    finally:
+                        prevent_sleeping(False)
                     task.disable()
                     communicate.task_done.emit(task)
                     if task.exit_after_task or task.config.get('Exit After Task'):
@@ -856,25 +865,13 @@ class TaskExecutor:
                         self.device_manager.stop_hwnd()
                         time.sleep(5)
                         communicate.quit.emit()
-                task.running = False
-                self.current_task = None
-                if not is_trigger_task:
-                    communicate.task.emit(task)
             except TaskDisabledException:
                 logger.info(f"TaskDisabledException, continue {task}")
-                task.running = False
-                self.current_task = None
-                if not is_trigger_task:
-                    communicate.task.emit(task)
+                self._finish_task(task, is_trigger_task)
                 communicate.notification.emit('Stopped', task.name, False,
                                               False, None, None, None)
-                continue
             except FinishedException:
                 logger.info(f"FinishedException, breaking")
-                task.running = False
-                self.current_task = None
-                if not is_trigger_task:
-                    communicate.task.emit(task)
                 break
             except Exception as e:
                 if isinstance(e, CaptureException):
@@ -882,7 +879,6 @@ class TaskExecutor:
                 name = task.name
                 task.running = False
                 task.disable()
-                from ok import og
                 params = None
                 if isinstance(e, HotkeyConfigException):
                     error = "{key} is invalid, please check the hotkey config!"
@@ -893,10 +889,20 @@ class TaskExecutor:
                 task.info_set(task._app.tr('Error'), error)
                 logger.error(f"{name} exception stopped", e)
                 if self._frame is not None:
-                    communicate.screenshot.emit(self.frame, name, True, None)
+                    communicate.screenshot.emit(self._frame, name, True, None)
                 self.current_task = None
                 communicate.task.emit(None)
+            finally:
+                self._finish_task(task, is_trigger_task)
         self.destroy()
+
+    def _finish_task(self, task, is_trigger_task):
+        if self.current_task is None and not task.running:
+            return
+        task.running = False
+        self.current_task = None
+        if not is_trigger_task:
+            communicate.task.emit(task)
 
     def stop(self):
         logger.info('stop')
@@ -955,15 +961,13 @@ class TaskExecutor:
         logger.debug(f'get_task_by_class {cls} {self.onetime_tasks} {self.trigger_tasks}')
         # Imports held by other tasks may refer to the previous class object.
         key = (cls.__module__, cls.__qualname__)
-        for task in self.get_all_tasks():
+        tasks = self.get_all_tasks()
+        for task in tasks:
             if (type(task).__module__, type(task).__qualname__) == key:
                 return task
-        for onetime_task in self.onetime_tasks:
-            if isinstance(onetime_task, cls):
-                return onetime_task
-        for trigger_task in self.trigger_tasks:
-            if isinstance(trigger_task, cls):
-                return trigger_task
+        for task in tasks:
+            if isinstance(task, cls):
+                return task
 
 
 def list_or_obj_to_str(val):

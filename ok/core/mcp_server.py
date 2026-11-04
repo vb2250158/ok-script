@@ -1,4 +1,4 @@
-"""Optional localhost MCP transport for task development and explicit reloading."""
+"""Localhost MCP transport for task development and explicit reloading."""
 
 import asyncio
 import errno
@@ -101,18 +101,26 @@ class _BearerAuth:
 
 
 def create_mcp_app(runner, token, port, request_exit=None):
-    """Build the task and skill ASGI app, importing the optional SDK only here."""
+    """Build the task and skill ASGI app, loading the SDK only when the server is enabled."""
     try:
         from mcp.server import MCPServer
         from mcp.server.transport_security import TransportSecuritySettings
     except ImportError as error:
-        raise RuntimeError('Install the MCP profile: pip install "ok-script[mcp]"') from error
+        raise RuntimeError("The required MCP dependency is missing or incompatible. Reinstall this project's pinned ok-script dependencies.") from error
 
     mcp = MCPServer('ok-script', instructions=(
         'Call list_skills to discover packaged ok-script instructions, then get_skill '
         'with the relevant skill ID before working. Skills are also MCP resources. '
         'These skills are for the consuming application: its tasks, config, assets, '
         'environment and tests, not for developing or publishing the ok-script library. '
+        'Before creating or changing named image features, read get_skill("generate-templates"). '
+        'Keep full screenshots and coco_annotations.json in ok_templates, author with '
+        'CocoTemplateStore, and call generate_templates to export split features into '
+        'assets/templates (ok_tasks/assets/templates for custom scripts). Use find_feature '
+        'or find_one with original feature names; do not substitute hand-cropped runtime '
+        'PNGs or a custom cv2.matchTemplate loader. Full ok_templates screenshots can also '
+        'be used directly as regression-test fixtures with TaskTestCase.set_image or '
+        'FeatureSet; read get_skill("write-test") for testing. '
         'For existing tasks, prefer list_tasks, edit the returned source files in place, '
         'then reload_tasks with task_ids (omit task_ids to reload all). Poll get_run_status '
         'until the reload finishes before testing. Read the reload-tasks skill for this workflow. '
@@ -224,7 +232,7 @@ class LocalMcpServer:
         app = runtime.headless_app if runtime.should_init_task_manager_headless() else runtime.app
         self.runner = McpTaskRunner(runtime.task_executor, app, runtime.screenshot,
                                     config.get('artifact_directory', 'logs/mcp'), self._prepare_device,
-                                    task_manager=og.task_manager)
+                                    task_manager=og.task_manager, retention_days=config.get('retention_days', 7))
         self._server = None
         self._socket = None
         self._thread = None
@@ -281,9 +289,11 @@ class LocalMcpServer:
             self.port = self._socket.getsockname()[1]
             app = create_mcp_app(self.runner, self.token, self.port, self.exit_process)
             import uvicorn
+            # uvicorn's default log_config goes through dictConfig, which closes every
+            # existing handler in the process, including the ok-script.log file handler.
             self._server = uvicorn.Server(uvicorn.Config(
                 app, host='127.0.0.1', port=self.port, log_level='warning', access_log=False,
-                timeout_graceful_shutdown=5))
+                log_config=None, timeout_graceful_shutdown=5))
 
             def serve():
                 try:

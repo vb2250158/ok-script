@@ -7,9 +7,19 @@ description: Implement and debug third-party application tasks with the ok-scrip
 
 Use this skill inside the consuming application's project. Edit its task modules, configuration, and assets through the installed ok-script APIs and local MCP server. Developing or changing the ok-script library itself is outside this skill's scope.
 
+Do not use Computer Use skills, plugins, or tools for this workflow, including target interaction, recovery, screenshots, and GUI task-card validation. Use ok-script APIs and MCP for application capture and interaction, and local file/process tools for development and diagnostics. This restriction also applies to the setup, reload, template, and test workflows invoked from this skill.
+
 Read [docs/mcp.md](../../../docs/mcp.md) for the current server, tools, task contract, and artifacts. The coding agent already has local file and process access: write code and read logs/images directly. Use [setup-env](../setup-env/SKILL.md) or [setup-project](../setup-project/SKILL.md) only when setup is missing.
 
-For screenshot annotations and named template features, use [generate-templates](../generate-templates/SKILL.md): retain originals in `ok_templates`, update its COCO annotations, generate runtime assets with the existing exporter, and verify `find_feature`/`find_one` against those assets.
+Before creating or changing named image features, read [generate-templates](../generate-templates/SKILL.md) and use the library's authoring/export pipeline:
+
+1. Retain full original screenshots in `ok_templates/` and record feature rectangles and names in `ok_templates/coco_annotations.json` using `CocoTemplateStore`.
+2. Call `ok.feature.FeatureSet.generate_templates` to export split PNGs into `assets/templates/` (or `ok_tasks/assets/templates/` for custom scripts). Let the exporter write the geometry-bearing filenames.
+3. Configure `template_matching.template_folder` and use `find_feature`/`find_one` with the original feature names in task code.
+
+Do not replace this pipeline with hand-cropped runtime PNGs, a custom template registry, or a parallel `cv2.matchTemplate` loader for named features. Crop previews are diagnostics, not runtime assets. Existing packed COCO assets and `coco_feature_json` remain supported. The split loader reports malformed filenames; fix the source annotation and regenerate instead of renaming crops or ignoring the error.
+
+The full screenshots in `ok_templates/` can also serve directly as regression-test fixtures. Follow [write-test](../write-test/SKILL.md) to exercise real task recognition with `TaskTestCase.set_image()` or the exported assets with `FeatureSet`; there is no need to duplicate these images under `tests/images/`. A source-image self-match checks the export path; add independent positive and negative screenshots when available to check recognition robustness.
 
 For existing registered tasks, prefer [reload-tasks](../reload-tasks/SKILL.md): discover their source with `list_tasks()`, edit it in place, call `reload_tasks(task_ids=[...])`, and wait for a successful reload before testing. Keep automation behavior in its existing module; use temporary MCP files only as thin validation harnesses. Create new task implementations when the requested functionality is new.
 
@@ -50,6 +60,6 @@ When the task is also a user feature, register it in `onetime_tasks` and set a u
 
 The MCP runner invokes reset/verification and supplies an artifact directory. The normal GUI scheduler calls `run()` without those MCP hooks. Support both paths: let GUI execution prepare recovery, verification, and a fresh local artifact directory; honor MCP's already verified start and provided directory. Clear per-attempt flags in `finally`, and refresh settings, timers, results, and artifact paths for repeated GUI runs. Keep recovery in the executor execution path, not GUI construction.
 
-When GUI lifecycle is in scope, use the separate MCP-disabled GUI launcher with `pythonw.exe` and test the actual task card's Start action with available UI tools. Check that starting the user GUI replaces the same project's console runtime and closes its MCP listener. A passing file submission alone does not verify GUI lifecycle behavior. Computer Use is an optional means of testing the desktop task card, not a dependency of game automation through ok-script MCP. If desktop UI tooling is unavailable, report the missing Start-action check separately; do not block MCP game validation, introduce a runtime dependency, or claim that launching the GUI verifies its Start button.
+When GUI lifecycle is in scope, use the separate MCP-disabled GUI launcher with `pythonw.exe`. Check that starting the user GUI replaces the same project's console runtime and closes its MCP listener. Test the actual task card's Start action only through permitted ok-script APIs or an application-local test harness that exercises that action. If this check cannot be performed without Computer Use, report it as unverified and continue MCP validation. A passing file submission or launching the GUI alone does not verify its Start button or GUI lifecycle behavior.
 
 Report the task/config paths, tested target states or sizes, observed success evidence, relevant checks, and remaining limits. Extend existing tests for meaningful recognition, recovery, or lifecycle changes; use real target execution to verify input and capture behavior.

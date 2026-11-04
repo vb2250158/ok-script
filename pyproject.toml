@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ok-script"
 dynamic = ["version"]
-description = "Automation with Computer Vision for Python"
+description = "Vibe Coding Automation Framework"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
 requires-python = ">=3.11"
@@ -36,12 +36,10 @@ dependencies = [
     "pycaw==20240210",
     "mouse==0.7.1",
     "pynput>=1.8.1",
+    "mcp==2.3.0",
 ]
 
 [project.optional-dependencies]
-mcp = [
-    "mcp==2.3.0",
-]
 default = [
     "numpy>=1.26.4",
     "Pillow>=10.0",
@@ -74,14 +72,12 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/ok-oldking/ok-script"
 Repository = "https://github.com/ok-oldking/ok-script"
+"Agent setup" = "https://github.com/ok-oldking/ok-script/blob/master/docs/agent-setup.md"
 
 [project.scripts]
 ok = "ok.cli:main"
 
 [dependency-groups]
-mcp = [
-    "mcp==2.3.0",
-]
 default = [
     "numpy>=1.26.4",
     "Pillow>=10.0",
@@ -117,3 +113,6 @@ zip-safe = false
 
 [tool.setuptools.packages.find]
 exclude = ["tests*", "docs*"]
+
+[tool.setuptools.package-data]
+ok = ["assets/*.png"]

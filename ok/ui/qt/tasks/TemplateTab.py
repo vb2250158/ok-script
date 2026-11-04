@@ -5,7 +5,7 @@ from typing import TypedDict
 
 import cv2
 from ok.util.image_io import cv_imread, cv_imwrite
-from PySide6.QtCore import Qt, Signal, QTimer, QRunnable, QThreadPool, QObject
+from PySide6.QtCore import Qt, Signal, QTimer, QRunnable, QThreadPool, QObject, QCoreApplication
 from PySide6.QtGui import QPixmap, QImage
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                                QScrollArea, QLabel, QFrame)
@@ -243,7 +243,8 @@ def save_template_screenshot():
     folder = ensure_template_folder()
     file_path = os.path.join(folder, f"{get_next_image_name(folder)}.png")
     if not cv_imwrite(file_path, frame):
-        raise RuntimeError(f"Could not write screenshot to {file_path}")
+        raise RuntimeError(QCoreApplication.translate(
+            'TemplateTab', 'Could not write screenshot to {path}').format(path=file_path))
     return file_path
 
 
@@ -1008,8 +1009,8 @@ class TemplateTab(QWidget):
         return module_path
 
     def save_compressed(self):
-        """Show a dialog with radio buttons for save destination."""
-        from ok.feature.FeatureSet import compress_copy_coco
+        """Choose the template export format and destination."""
+        from ok.feature.FeatureSet import compress_copy_coco, generate_templates
         from PySide6.QtWidgets import QButtonGroup
         from qfluentwidgets import MessageBoxBase, SubtitleLabel, RadioButton, CheckBox, LineEdit
         coco_json_path = get_coco_path()
@@ -1020,12 +1021,18 @@ class TemplateTab(QWidget):
             alert_error(self.tr("No annotations to save."))
             return
 
-        tasks_target = os.path.abspath(os.path.join('ok_tasks', 'assets'))
-        dev_target = os.path.abspath('assets')
-
         dlg = MessageBoxBase(self.window())
-        dlg.viewLayout.addWidget(SubtitleLabel(self.tr('Save To'), dlg))
+        dlg.viewLayout.addWidget(SubtitleLabel(self.tr('Generate function'), dlg))
+        radio_split = RadioButton(self.tr('Split(Recommend)'), dlg)
+        radio_compress = RadioButton(self.tr('Compress (obsolete)'), dlg)
+        format_group = QButtonGroup(dlg)
+        format_group.addButton(radio_split)
+        format_group.addButton(radio_compress)
+        radio_split.setChecked(True)
+        dlg.viewLayout.addWidget(radio_split)
+        dlg.viewLayout.addWidget(radio_compress)
 
+        dlg.viewLayout.addWidget(SubtitleLabel(self.tr('Save To'), dlg))
         debug = og.app.debug
         radio_tasks = RadioButton(self.tr('ok_tasks/assets (custom scripts)'), dlg)
         radio_dev = None
@@ -1080,7 +1087,10 @@ class TemplateTab(QWidget):
         if not dlg.exec():
             return
 
-        target_folder = tasks_target if radio_tasks.isChecked() else dev_target
+        target_folder = os.path.abspath(os.path.join('ok_tasks', 'assets')
+                                        if radio_tasks.isChecked() else 'assets')
+        if radio_split.isChecked():
+            target_folder = os.path.join(target_folder, 'templates')
         enum_relative_path_text = enum_relative_path_input.text().strip().replace('\\', '/')
         self.template_tab_config['generate_label_enum'] = generate_label_enum_checkbox.isChecked()
         self.template_tab_config['label_enum_relative_path'] = enum_relative_path_text
@@ -1094,10 +1104,11 @@ class TemplateTab(QWidget):
                 return
 
         try:
-            compress_copy_coco(coco_json_path, target_folder, image_folder,
-                               generate_label_enmu=generate_label_enmu)
+            generate = generate_templates if radio_split.isChecked() else compress_copy_coco
+            generate(coco_json_path, target_folder, image_folder,
+                     generate_label_enmu=generate_label_enmu)
 
-            # Reload feature set data safely (coco_json may have been cleared)
+            # Reload both configured and custom-script feature sources.
             try:
                 if og.executor.feature_set is not None:
                     og.executor.feature_set.process_data()
