@@ -2,7 +2,7 @@
 
 The public ``communicate`` object intentionally keeps the old ``signal.emit`` /
 ``signal.connect`` shape.  Core code can therefore publish events without
-importing Qt, while desktop and web adapters subscribe to the same bus.
+importing Qt, while the desktop adapter subscribes to the same bus.
 """
 
 from __future__ import annotations
@@ -45,6 +45,10 @@ class EventSignal:
             elif callback in self._subscribers:
                 self._subscribers.remove(callback)
 
+    def disconnect_where(self, predicate: Callable[[Callable[..., Any]], bool]) -> None:
+        with self._lock:
+            self._subscribers = [callback for callback in self._subscribers if not predicate(callback)]
+
     def emit(self, *args: Any, **kwargs: Any) -> None:
         with self._lock:
             subscribers = tuple(self._subscribers)
@@ -76,11 +80,11 @@ class EventBus:
     _event_names = (
         "log", "fps", "frame_time", "scene", "draw_box", "clear_box",
         "task", "task_list_updated", "task_done", "window",
-        "loading_progress", "notification", "executor_paused", "screenshot",
+        "loading_progress", "notification", "executor_paused", "executor_exclusive", "screenshot",
         "blur_overlay", "clear_blur_overlay", "adb_devices",
         "config_validation", "tab", "capture_error", "starting_emulator",
         "quit", "start_success", "act", "copyright", "global_config",
-        "restart_admin", "task_tab",
+        "restart_admin", "plugin_changes_updated",
     )
 
     def __init__(self):
@@ -93,6 +97,12 @@ class EventBus:
         def forward(*args: Any, **kwargs: Any) -> None:
             self.any.emit(EventMessage(name, args, kwargs))
         return forward
+
+    def disconnect_where(self, predicate: Callable[[Callable[..., Any]], bool]) -> None:
+        """Remove every subscriber of every event for which ``predicate`` is true."""
+        self.any.disconnect_where(predicate)
+        for name in self._event_names:
+            getattr(self, name).disconnect_where(predicate)
 
     def emit_draw_box(self, key=None, boxes=None, color=None, frame=None, debug=True):
         self.draw_box.emit(key, boxes, color, frame, debug)

@@ -1,33 +1,125 @@
-# ok-script 文档中心
+---
+hide:
+  - navigation
+  - toc
+---
 
-[English](en/index.md) · [项目主页](https://github.com/ok-oldking/ok-script)
+<div class="ok-hero" markdown>
 
-文档按“理解原理 → 运行项目 → 深入开发 → 查询 API”的顺序组织。第一次使用时，建议依次阅读前两篇。
+# Vibe Coding 自动化框架
 
-## 学习路径
+**在 Codex、Claude Code 或任何支持 MCP 的编程代理里许个愿，得到一个可部署的自动化程序。**
 
-| 文档 | 适合读者 | 主要内容 |
-| --- | --- | --- |
-| [游戏自动化入门](intro_to_automation/README.md) | 没有计算机视觉或自动化经验的读者 | 截图、图像分析、决策、输入和开发工具 |
-| [快速开始](quick_start/README.md) | 准备创建第一个项目的开发者 | Fork 模板、配置环境、连接设备、运行和诊断 |
-| [界面与开发工具](interface.md) | 想了解可视化工作流的开发者 | 任务配置、截图与交互、脚本、模板和调试浮层 |
-| [进阶指南](after_quick_start/README.md) | 已经可以运行模板项目的开发者 | COCO 模板、i18n、自动化测试、打包和发布 |
-| [API 参考](api_doc/README.md) | 正在实现任务逻辑的开发者 | `Box`、`BaseTask`、截图、输入、OCR 和找图 API |
+代理通过 MCP 观察 Windows 应用、游戏或安卓设备，编写 Python 任务，在真实目标上运行并修复失败。ok-script 把完成的任务连同桌面 GUI 打包成可分发的 Windows 安装包。打包后的程序独立运行，无需代理保持连接。
 
-## 最短上手路线
+[MCP 快速开始](quick_start/README.md){ .md-button .md-button--primary }
+[复制代理提示词](agent-prompts.md){ .md-button }
+[English](en/index.md){ .md-button }
 
-1. 安装 Python 3.12（框架最低支持 Python 3.11）。
-2. 使用 [`ok-script-app`](https://github.com/ok-oldking/ok-script-app) 模板创建仓库。
-3. 按照[快速开始](quick_start/README.md)配置 Windows 游戏或 ADB 设备。
-4. 运行调试模式并完成截图测试。
-5. 参考 [API 文档](api_doc/README.md)实现自己的任务。
+</div>
 
-## 常用链接
+## MCP 开发流程
 
-- [ok-script 源码](https://github.com/ok-oldking/ok-script)
-- [ok-script 应用模板](https://github.com/ok-oldking/ok-script-app)
-- [ok-py 可视化脚本工具](https://github.com/ok-oldking/ok-py)
-- [PyPI 发布页](https://pypi.org/project/ok-script/)
-- [文档网站构建说明](building-site.md)
+代理用自己的工具编辑文件、读取日志；MCP 让它直接操作正在运行的应用。
 
-发现文档与代码不一致时，请在 GitHub 提交 issue，并附上使用的 ok-script 版本、Python 版本和运行环境。
+<div class="grid cards" markdown>
+
+-   :material-book-open-variant:{ .lg .middle } __1. 学习__
+
+    ---
+
+    `list_skills` 和 `get_skill` 返回当前安装版本自带的开发、模板、测试和重载流程；代理从已安装包中读取准确的 Python 签名。
+
+-   :material-monitor-screenshot:{ .lg .middle } __2. 观察__
+
+    ---
+
+    `screenshot` 保存已配置窗口或设备的当前画面，代理看到的就是任务将要看到的。
+
+-   :material-play-circle:{ .lg .middle } __3. 运行__
+
+    ---
+
+    `run_task` 在真实目标上执行 Python 任务文件。每次尝试先恢复并验证起始状态，再由 `run()` 执行并断言自动化结果。
+
+-   :material-file-search:{ .lg .middle } __4. 检查__
+
+    ---
+
+    每次尝试在 `logs/mcp/<run_id>/` 下写入 `run.log`、`status.json` 和任务截图。`get_run_status` 报告进度和错误，`stop_task` 用于取消。
+
+-   :material-wrench:{ .lg .middle } __5. 修复__
+
+    ---
+
+    `list_tasks` 返回已注册任务的源码路径；修改后用 `reload_tasks` 在运行中的进程里替换。无法重置时用 `exit_process` 结束运行时。
+
+-   :material-rocket-launch:{ .lg .middle } __6. 交付__
+
+    ---
+
+    注册任务，通过 GUI 或 `python -m ok run_task` 运行，并用 [PyAppify](https://github.com/ok-oldking/pyappify) 打包成 Windows 安装包。详见[打包与发布](after_quick_start/README.md)。
+
+</div>
+
+## 可以这样告诉编程代理
+
+=== "开发任务"
+
+    > 连接这个项目的 ok-script MCP 服务，读取开发技能。检查已安装的截图、匹配和输入 API，给出准确签名和源码位置。开发可复用 Python 任务：打开设置、启用“显示详情”、保存并验证结果。每次尝试前恢复并验证起始界面，测试重复运行，代码保存到项目中。使用 ok-script API 和 MCP，不使用 Computer Use 工具。最后给出不依赖代理或大模型调用的准确运行命令。
+
+=== "修复任务"
+
+    > 连接这个项目的 ok-script MCP 服务，读取 reload-tasks 技能。用 list_tasks 找到出错任务的源码，修改该文件，按任务 ID 重载并等待重载成功。恢复并验证起始界面，重复运行已注册的实现，并给出运行日志和截图中的证据。
+
+=== "安装环境"
+
+    > 在当前项目中安装 ok-script 并配置运行环境。先读取 https://raw.githubusercontent.com/ok-oldking/ok-script/master/docs/agent-setup.md ，按照其中的安装技能操作，保留项目现有的依赖约束。
+
+[编程代理提示词](agent-prompts.md)提供了查询 API、开发任务和维护已有任务的完整示例。
+
+## 三步连接
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install "ok-script[default]"
+.\.venv\Scripts\python.exe -m ok mcp --config src.config:config
+```
+
+1. 用项目配置启动运行时，或在已有桌面应用中开启 **设置 > 基本设置 > 启用 MCP 服务器**。
+2. 从有效的 `logs/mcp/connections/<pid>-<port>.json` 记录中读取 URL 和 token。
+3. 让代理的 MCP 客户端通过 Streamable HTTP 连接，并使用 `Authorization: Bearer <token>` 请求头。
+
+!!! warning "本地开发者权限"
+    服务只监听本机回环地址，但已连接的代理可以用你的账户权限执行 Python。不要公开 token，日常使用请保留单独的、关闭 MCP 的启动器。
+
+## 文档导航
+
+<div class="grid cards" markdown>
+
+-   :material-flag-checkered:{ .lg .middle } __开始 MCP 开发__
+
+    ---
+
+    [MCP 快速开始](quick_start/README.md) · [代理安装指南（英文）](agent-setup.md) · [编程代理提示词](agent-prompts.md)
+
+-   :material-api:{ .lg .middle } __MCP 参考__
+
+    ---
+
+    [MCP 连接与执行（英文）](mcp.md)：工具、运行状态、重载、诊断和任务文件约定。[模板导出格式（英文）](feature-crops.md)。
+
+-   :material-package-variant-closed:{ .lg .middle } __交付与维护__
+
+    ---
+
+    [维护和分享任务](after_quick_start/README.md)：模板、回归测试、国际化和打包。[导入插件](plugins.md) · [Windows 计划任务](Windows%20计划任务.md)
+
+-   :material-cog-outline:{ .lg .middle } __原理与工具__
+
+    ---
+
+    [自动化原理](intro_to_automation/README.md) · [界面与开发工具](interface.md) · [运行时架构（英文）](architecture.md)
+
+</div>
+
+需要具体 API 时，让代理检查项目实际安装版本的源码和方法签名，无需手动查阅静态 API 手册。

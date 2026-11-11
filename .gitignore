@@ -21,6 +21,7 @@ showcase_genshin/config/
 logs/
 **/logs/
 .venv/
+.venv-qt-tools/
 build/
 develop-eggs/
 dist/
@@ -66,3 +67,6 @@ myRes/
 pytest-cache-files-*/
 .tmp-pytest/
 tmp_install/
+
+# Installed plugins and queued update/deletion data
+/ok_import/

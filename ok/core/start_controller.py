@@ -1,3 +1,4 @@
+import threading
 import time
 
 from ok import Handler, og
@@ -27,6 +28,81 @@ class StartController:
         self.start_method = windows_config.get('start_method', WINDOWS_START_METHOD_START)
         self.starting = False
 
+    @property
+    def _cancel_requested(self):
+        event = self.__dict__.get('_cancel_event')
+        if event is None:
+            event = self.__dict__['_cancel_event'] = threading.Event()
+        return event
+
+    @property
+    def _pending(self):
+        """Tasks requested by :meth:`start` that are not enabled yet, in request order."""
+        state = self.__dict__.get('_pending_state')
+        if state is None:
+            state = self.__dict__['_pending_state'] = (threading.Lock(), [])
+        return state
+
+    def is_task_pending(self, task):
+        """Whether ``task`` waits for the game to launch before it is queued."""
+        lock, tasks = self._pending
+        with lock:
+            return task in tasks
+
+    def _add_pending(self, task):
+        if task is None or isinstance(task, int):
+            return
+        lock, tasks = self._pending
+        with lock:
+            if task not in tasks:
+                tasks.append(task)
+        communicate.task.emit(task)
+
+    def _discard_pending(self, task):
+        if task is None or isinstance(task, int):
+            return False
+        lock, tasks = self._pending
+        with lock:
+            if task not in tasks:
+                return False
+            tasks.remove(task)
+        communicate.task.emit(task)
+        return True
+
+    def cancel_task(self, task):
+        """Drop a task that waits for the game to launch.
+
+        If the launch in progress was started for that task, stop waiting for
+        the game too. Returns whether the task was pending.
+        """
+        if not self._discard_pending(task):
+            return False
+        logger.info(f'cancel pending start of {task}')
+        if self.__dict__.get('_active_task') is task:
+            self._cancel_requested.set()
+        return True
+
+    def cancel_start(self):
+        """Stop waiting for the game to launch and drop every task waiting for it.
+
+        The game process is left running.
+        """
+        logger.info('cancel_start requested')
+        self._cancel_requested.set()
+        lock, tasks = self._pending
+        with lock:
+            dropped = list(tasks)
+            tasks.clear()
+        for task in dropped:
+            communicate.task.emit(task)
+
+    def _cancelled(self):
+        if self._cancel_requested.is_set():
+            logger.info('start cancelled while waiting for the game')
+            communicate.starting_emulator.emit(True, None, 0)
+            return True
+        return False
+
     def tr(self, message):
         app = getattr(og, "app", None)
         return app.tr(message) if app is not None else message
@@ -41,21 +117,40 @@ class StartController:
         communicate.task.emit(task)
 
     def start(self, task=None, exit_after=False):
+        """Launch the game if needed, then run ``task``.
+
+        Until the game is ready the task is pending: :meth:`is_task_pending`
+        reports it and :meth:`cancel_task` drops it.
+        """
         self.starting = True
+        self._add_pending(task)
         try:
-            self.handler.post(lambda: self.do_start(task, exit_after))
+            self.handler.post(lambda: self.do_start(task, exit_after, from_queue=True))
         except Exception:
             self.starting = False
+            self._discard_pending(task)
             raise
 
-    def do_start(self, task=None, exit_after=False):
+    def do_start(self, task=None, exit_after=False, from_queue=False):
+        if from_queue and task is not None and not isinstance(task, int) and not self.is_task_pending(task):
+            logger.info(f'do_start skipped, {task} was cancelled or already started')
+            return False
         self.starting = True
+        self._cancel_requested.clear()
+        self.__dict__['_active_task'] = task
         try:
             return self._do_start(task, exit_after)
         finally:
+            self.__dict__['_active_task'] = None
+            self._discard_pending(task)
             self.starting = False
 
     def _do_start(self, task=None, exit_after=False):
+        if (owner := getattr(getattr(og, 'executor', None), 'exclusive_owner', None)) is not None:
+            logger.info(f'do_start refused, executor held by {owner}')
+            communicate.starting_emulator.emit(
+                True, self.tr('Cannot start: the app is controlled by {owner}').format(owner=owner), 0)
+            return False
         communicate.starting_emulator.emit(False, None, self.start_timeout)
         tasks_to_enable = []
         try:
@@ -83,7 +178,7 @@ class StartController:
                 return True
         except Exception as e:
             logger.error(f'do_start resume exception: {e}', e)
-            communicate.starting_emulator.emit(True, self.tr(f'Start failed: {e}'), 0)
+            communicate.starting_emulator.emit(True, self.tr('Start failed: {error}').format(error=e), 0)
             return False
 
         try:
@@ -112,10 +207,21 @@ class StartController:
                     logger.info(f"enable_after_start task {start_task}")
                     add_task_to_enable(start_task)
 
+            lock, pending = self._pending
+            with lock:
+                if task is not None and not isinstance(task, int) and task not in pending:
+                    logger.info(f'{task} was cancelled while the game was starting')
+                    task = None
+                waiting = list(pending)
+                pending.clear()
+
             if task:
                 add_task_to_enable(task)
                 if exit_after:
                     task.exit_after_task = True
+            # Tasks requested during this launch run once the game is ready.
+            for waiting_task in waiting:
+                add_task_to_enable(waiting_task)
 
             for task in tasks_to_enable:
                 self._mark_task_enabled(task)
@@ -125,13 +231,15 @@ class StartController:
             return True
         except Exception as e:
             logger.error(f'do_start exception: {e}', e)
-            communicate.starting_emulator.emit(True, self.tr(f'Start failed: {e}'), 0)
+            communicate.starting_emulator.emit(True, self.tr('Start failed: {error}').format(error=e), 0)
             return False
 
     def _wait_until_device_ready(self, refresh_first=True):
         wait_until = time.time() + self.start_timeout
         first_check = True
         while not self.exit_event.is_set():
+            if self._cancelled():
+                return False
             if refresh_first or not first_check:
                 og.device_manager.do_refresh(True)
             first_check = False
@@ -154,6 +262,8 @@ class StartController:
         min_width, min_height = self.STARTED_WINDOW_MIN_SIZE
 
         while not self.exit_event.is_set():
+            if self._cancelled():
+                return False
             hwnd_window = getattr(og.device_manager, 'hwnd_window', None)
             if hwnd_window is not None:
                 hwnd_window.do_update_window_size()
@@ -185,7 +295,7 @@ class StartController:
         if device and not device['connected']:
             if device['device'] == "windows" and not is_admin():
                 communicate.starting_emulator.emit(True,
-                                                   "PC version requires admin privileges, Please restart this app with admin privileges!",
+                                                   self.tr("PC version requires admin privileges, Please restart this app with admin privileges!"),
                                                    0)
                 communicate.restart_admin.emit()
                 return False
@@ -264,6 +374,9 @@ class StartController:
                 )
                 for feature in enabled_features
             ]
+            if any(feature.vendor == 'NVIDIA' and feature.feature in (
+                    'Filter Profile', 'RTX HDR', 'RTX Dynamic Vibrance') for feature in enabled_features):
+                warning_lines.append(self.tr('Try using Alt+F3 to turn it off.'))
             logger.warning('\n'.join(warning_lines))
             communicate.notification.emit(
                 '\n'.join(warning_lines),
@@ -345,7 +458,7 @@ class StartController:
                         hwnd_window.do_update_window_size()
                     if not og.device_manager.capture_method.hwnd_window.pos_valid:
                         return self.tr(
-                            f'Window is minimized or out of screen, and don\'t use full-screen exclusive mode!')
+                            'Window is minimized or out of screen, and don\'t use full-screen exclusive mode!')
             frame = self.try_capture_a_frame()
             if frame is None:
                 logger.error(f'check_device_error: try_capture_a_frame returned None')
@@ -380,7 +493,9 @@ class StartController:
     def try_capture_a_frame():
         start = time.time()
         while True:
-            frame = og.device_manager.capture_method.get_frame()
+            # A running executor may own the capture; wait for it rather than
+            # polling a lock it releases only briefly between frames.
+            frame = og.device_manager.capture_method.get_frame(busy_wait=1)
             if frame is not None:
                 return frame
             logger.info(f'try_capture_a_frame: frame is None, retrying...')

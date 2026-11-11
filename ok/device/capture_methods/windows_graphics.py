@@ -2,6 +2,7 @@ import ctypes
 import threading
 import time
 
+import cv2
 import numpy as np
 import win32gui
 
@@ -33,9 +34,11 @@ class WindowsGraphicsCaptureMethod(BaseWindowsCaptureMethod):
         return DirectXPixelFormat.B8G8R8A8UIntNormalized
 
     def read_mapped_frame(self, mapinfo):
-        return np.ctypeslib.as_array(ctypes.cast(mapinfo.pData, PBYTE),
-                                    (self.last_size.Height, mapinfo.RowPitch // 4, 4))[
-            :, :self.last_size.Width].copy()
+        mapped = np.ctypeslib.as_array(ctypes.cast(mapinfo.pData, PBYTE),
+                                       (self.last_size.Height, mapinfo.RowPitch // 4, 4))[:, :self.last_size.Width]
+        # One pass copies out of the mapped buffer and drops alpha, giving a
+        # contiguous BGR frame instead of a strided view of a BGRA copy.
+        return cv2.cvtColor(mapped, cv2.COLOR_BGRA2BGR)
 
     def __init__(self, hwnd_window):
         super().__init__(hwnd_window)
@@ -327,7 +330,20 @@ class WindowsGraphicsCaptureMethod(BaseWindowsCaptureMethod):
         frame_requested, frame_event, and last_frame represent one in-flight
         request. Only one caller may operate on them at a time.
         """
-        if not self.get_frame_lock.acquire(blocking=False):
+        return self.do_get_frame_wait(0)
+
+    def do_get_frame_wait(self, timeout):
+        """Like do_get_frame(), but wait up to timeout for the request lock.
+
+        The task executor requests frames almost continuously, so a one-off
+        caller on another thread would otherwise nearly always see BUSY. The
+        timeout only bounds the lock wait; the frame wait is unchanged.
+        """
+        if timeout > 0:
+            acquired = self.get_frame_lock.acquire(timeout=timeout)
+        else:
+            acquired = self.get_frame_lock.acquire(blocking=False)
+        if not acquired:
             raise CaptureBusyException('Windows Graphics Capture is busy')
         try:
             return self._do_get_frame()

@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ok-script"
 dynamic = ["version"]
-description = "Automation with Computer Vision for Python"
+description = "Vibe Coding Automation Framework"
 readme = "README.md"
 license = { file = "LICENSE.txt" }
 requires-python = ">=3.11"
@@ -28,7 +28,7 @@ classifiers = [
 ]
 dependencies = [
     "pywin32>=306,!=312",
-    "pyappify>=1.0.9",
+    "pyappify>=1.0.16",
     "typing-extensions>=4.11.0",
     "requests>=2.32.3",
     "psutil>=6.0.0",
@@ -36,6 +36,7 @@ dependencies = [
     "pycaw==20240210",
     "mouse==0.7.1",
     "pynput>=1.8.1",
+    "mcp==2.3.0",
 ]
 
 [project.optional-dependencies]
@@ -45,16 +46,8 @@ default = [
     "ok-d3dshot>=0.1.5",
     "OpenCC==1.2.0",
 ]
-web = [
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.30.0",
-    "pywebview>=5.4",
-]
 qt = [
-    "PySide6-Essentials>=6.7.0",
-    "PySideSix-Frameless-Window>=0.3.12",
-    "darkdetect>=0.8.0",
-    "PySide6-Fluent-Widgets>=1.8.3",
+    "ok-pyside-minimal>=6.12.0.post2",
 ]
 adb = [
     "adbutils>=2.2.1",
@@ -76,6 +69,7 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/ok-oldking/ok-script"
 Repository = "https://github.com/ok-oldking/ok-script"
+"Agent setup" = "https://github.com/ok-oldking/ok-script/blob/master/docs/agent-setup.md"
 
 [project.scripts]
 ok = "ok.cli:main"
@@ -87,16 +81,8 @@ default = [
     "ok-d3dshot>=0.1.5",
     "OpenCC==1.2.0",
 ]
-web = [
-    "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.30.0",
-    "pywebview>=5.4",
-]
 qt = [
-    "PySide6-Essentials>=6.7.0",
-    "PySideSix-Frameless-Window>=0.3.12",
-    "darkdetect>=0.8.0",
-    "PySide6-Fluent-Widgets>=1.8.3",
+    "ok-pyside-minimal>=6.12.0.post2",
 ]
 adb = [
     "adbutils>=2.2.1",
@@ -123,4 +109,4 @@ zip-safe = false
 exclude = ["tests*", "docs*"]
 
 [tool.setuptools.package-data]
-"ok.ui.web" = ["static/*.html", "static/*.js", "static/*.css", "static/*.png"]
+ok = ["assets/*.png"]

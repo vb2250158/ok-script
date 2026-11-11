@@ -93,6 +93,14 @@
             <source>Disclaimer</source>
             <translation>免責事項</translation>
         </message>
+        <message>
+            <source>BrownDust II</source>
+            <translation>ブラウンダスト2</translation>
+        </message>
+        <message>
+            <source>Azur Promilia</source>
+            <translation>アズールプロミリア</translation>
+        </message>
     </context>
     <context>
         <name>ActWindow</name>
@@ -251,6 +259,22 @@
         <message>
             <source>No Capture Available or Selected</source>
             <translation>キャプチャ方法が利用不可または未選択です</translation>
+        </message>
+        <message>
+            <source>Reload tasks</source>
+            <translation>タスクを再読み込み</translation>
+        </message>
+        <message>
+            <source>Waiting to reload tasks...</source>
+            <translation>タスクの再読み込みを待機中…</translation>
+        </message>
+        <message>
+            <source>Reloaded {count} tasks</source>
+            <translation>{count} 個のタスクを再読み込みしました</translation>
+        </message>
+        <message>
+            <source>The app is controlled by {owner}</source>
+            <translation>アプリは {owner} によって制御されています</translation>
         </message>
     </context>
     <context>
@@ -469,6 +493,58 @@
             <source>Run Code</source>
             <translation>コード実行</translation>
         </message>
+        <message>
+            <source>Import failed: {error}</source>
+            <translation>インポートに失敗しました：{error}</translation>
+        </message>
+        <message>
+            <source>Develop</source>
+            <translation>開発</translation>
+        </message>
+        <message>
+            <source>Diagnosis</source>
+            <translation>診断</translation>
+        </message>
+        <message>
+            <source>Disconnect</source>
+            <translation>切断</translation>
+        </message>
+        <message>
+            <source>Game</source>
+            <translation>ゲーム</translation>
+        </message>
+        <message>
+            <source>Log</source>
+            <translation>ログ</translation>
+        </message>
+        <message>
+            <source>Remote Control</source>
+            <translation>リモート操作</translation>
+        </message>
+        <message>
+            <source>Run</source>
+            <translation>実行</translation>
+        </message>
+        <message>
+            <source>Success</source>
+            <translation>成功</translation>
+        </message>
+        <message>
+            <source>{owner} is controlling the app. Other tasks are stopped.</source>
+            <translation>{owner} がアプリを操作中です。他のタスクは停止しています。</translation>
+        </message>
+        <message>
+            <source>Cancel</source>
+            <translation>キャンセル</translation>
+        </message>
+        <message>
+            <source>New version available</source>
+            <translation>新しいバージョンがあります</translation>
+        </message>
+        <message>
+            <source>Version {version} is available.</source>
+            <translation>バージョン {version} が利用可能です。</translation>
+        </message>
     </context>
     <context>
         <name>MessageWindow</name>
@@ -522,6 +598,10 @@
         <message>
             <source>Search options...</source>
             <translation>オプションを検索...</translation>
+        </message>
+        <message>
+            <source>Edit List</source>
+            <translation>リストを編集</translation>
         </message>
     </context>
     <context>
@@ -605,16 +685,16 @@
             <translation>WGC - 高速、HDR 対応（AutoHDR 非対応）</translation>
         </message>
         <message>
-            <source>WGC_HDR - Only use when using Windows AutoHDR (Not Recommended)</source>
-            <translation>WGC_HDR - Windows AutoHDR 使用時のみ使用（非推奨）</translation>
+            <source>WGC_HDR - Only use when using AutoHDR (Not Recommended)</source>
+            <translation>WGC_HDR - AutoHDR 使用時のみ使用（非推奨）</translation>
         </message>
         <message>
             <source>Fast, support HDR (not AutoHDR)</source>
             <translation>高速、HDR 対応（AutoHDR 非対応）</translation>
         </message>
         <message>
-            <source>Only use when using Windows AutoHDR (Not Recommended)</source>
-            <translation>Windows AutoHDR 使用時のみ使用（非推奨）</translation>
+            <source>Only use when using AutoHDR (Not Recommended)</source>
+            <translation>AutoHDR 使用時のみ使用（非推奨）</translation>
         </message>
     </context>
     <context>
@@ -695,6 +775,26 @@
             <source>Configuration takes effect after restart</source>
             <translation>設定は再起動後に有効になります</translation>
         </message>
+        <message>
+            <source>Window Material</source>
+            <translation>ウィンドウの素材</translation>
+        </message>
+        <message>
+            <source>Mica tints the window with your wallpaper, Acrylic blurs what is behind it</source>
+            <translation>マイカは壁紙の色でウィンドウを色付けし、アクリルは背後を透かしてぼかします</translation>
+        </message>
+        <message>
+            <source>Mica</source>
+            <translation>マイカ</translation>
+        </message>
+        <message>
+            <source>Acrylic</source>
+            <translation>アクリル</translation>
+        </message>
+        <message>
+            <source>None</source>
+            <translation>なし</translation>
+        </message>
     </context>
     <context>
         <name>StartButton</name>
@@ -705,6 +805,14 @@
         <message>
             <source>Pause All</source>
             <translation>すべて一時停止</translation>
+        </message>
+        <message>
+            <source>Error</source>
+            <translation>エラー</translation>
+        </message>
+        <message>
+            <source>No Task to Run, Please Enable Task First!</source>
+            <translation>実行するタスクがありません。先にタスクを有効にしてください！</translation>
         </message>
     </context>
     <context>
@@ -856,6 +964,10 @@
             <source>GPU Driver Warning</source>
             <translation>GPU ドライバー警告</translation>
         </message>
+        <message>
+            <source>Try using Alt+F3 to turn it off.</source>
+            <translation>Alt+F3 を押して無効にしてみてください。</translation>
+        </message>
     </context>
     <context>
         <name>StartLoadingDialog</name>
@@ -945,6 +1057,18 @@
         <message>
             <source>View Log</source>
             <translation>ログを表示</translation>
+        </message>
+        <message>
+            <source>Please Start First</source>
+            <translation>先に開始してください</translation>
+        </message>
+        <message>
+            <source>Browser</source>
+            <translation>ブラウザー</translation>
+        </message>
+        <message>
+            <source>Refresh</source>
+            <translation>更新</translation>
         </message>
     </context>
     <context>
@@ -1725,8 +1849,8 @@
             <translation>WGC - 高速、HDR 対応（AutoHDR 非対応）</translation>
         </message>
         <message>
-            <source>WGC_HDR - Only use when using Windows AutoHDR (Not Recommended)</source>
-            <translation>WGC_HDR - Windows AutoHDR 使用時のみ使用（非推奨）</translation>
+            <source>WGC_HDR - Only use when using AutoHDR (Not Recommended)</source>
+            <translation>WGC_HDR - AutoHDR 使用時のみ使用（非推奨）</translation>
         </message>
         <message>
             <source>Resolution {resolution} check failed, some tasks might not work correctly!</source>
@@ -1753,8 +1877,144 @@
             <translation>高速、HDR 対応（AutoHDR 非対応）</translation>
         </message>
         <message>
-            <source>Only use when using Windows AutoHDR (Not Recommended)</source>
-            <translation>Windows AutoHDR 使用時のみ使用（非推奨）</translation>
+            <source>Only use when using AutoHDR (Not Recommended)</source>
+            <translation>AutoHDR 使用時のみ使用（非推奨）</translation>
+        </message>
+        <message>
+            <source>Try using Alt+F3 to turn it off.</source>
+            <translation>Alt+F3 を押して無効にしてみてください。</translation>
+        </message>
+        <message>
+            <source>Enable MCP Server</source>
+            <translation>MCP サーバーを有効にする</translation>
+        </message>
+        <message>
+            <source>Allow local coding agents to control this app and run Python code</source>
+            <translation>ローカルのコーディングエージェントにこのアプリの操作と Python コードの実行を許可する</translation>
+        </message>
+        <message>
+            <source>PC version requires admin privileges, Please restart this app with admin privileges!</source>
+            <translation>PC版には管理者権限が必要です。このアプリを管理者権限で再起動してください！</translation>
+        </message>
+        <message>
+            <source>No game selected!</source>
+            <translation>ゲームが選択されていません！</translation>
+        </message>
+        <message>
+            <source>Capture failed, please check game window</source>
+            <translation>キャプチャに失敗しました。ゲームウィンドウを確認してください。</translation>
+        </message>
+        <message>
+            <source>Game path does not exist, Please open game manually!</source>
+            <translation>ゲームパスが存在しません。手動でゲームを開いてください！</translation>
+        </message>
+        <message>
+            <source>Start game timeout!</source>
+            <translation>起動がタイムアウトしました！</translation>
+        </message>
+        <message>
+            <source>Window is minimized or out of screen, and don't use full-screen exclusive mode!</source>
+            <translation>ウィンドウが最小化されているか画面外にあります。排他全画面モードは使用しないでください！</translation>
+        </message>
+        <message>
+            <source>Start game failed, please start game first</source>
+            <translation>ゲームの起動に失敗しました。まず手動でゲームを起動してください。</translation>
+        </message>
+        <message>
+            <source>{} is not connected, please select the game window.</source>
+            <translation>{}が接続されていません。ゲームウィンドウとキャプチャ方法を選択してください。</translation>
+        </message>
+        <message>
+            <source>Selected capture method is not supported by the game or your system!</source>
+            <translation>選択されたキャプチャ方法は、ゲームまたはシステムでサポートされていません！</translation>
+        </message>
+        <message>
+            <source>Image resource load failed, please try install again.(Don't put the app in Downloads folder)</source>
+            <translation>画像リソースの読み込みに失敗しました。再インストールしてみてください。（アプリをダウンロードフォルダに入れないでください）</translation>
+        </message>
+        <message>
+            <source>Emulator is not connected, start the emulator first!</source>
+            <translation>エミュレータが接続されていません。まずエミュレータを起動してください！</translation>
+        </message>
+        <message>
+            <source>Can't start game, make sure the game is installed</source>
+            <translation>ゲームを開始できません。ゲームがインストールされていることを確認してください。</translation>
+        </message>
+        <message>
+            <source>NPU inferring Error, you might need to update the Intel NPU driver!</source>
+            <translation>NPU推論エラー。Intel NPUドライバーを更新する必要があるかもしれません。</translation>
+        </message>
+        <message>
+            <source>Export failed</source>
+            <translation>エクスポート失敗</translation>
+        </message>
+        <message>
+            <source>Cannot start: the app is controlled by {owner}</source>
+            <translation>開始できません：アプリは {owner} によって制御されています</translation>
+        </message>
+        <message>
+            <source>Cannot start {name}: the app is controlled by {owner}</source>
+            <translation>{name} を開始できません：アプリは {owner} によって制御されています</translation>
+        </message>
+        <message>
+            <source>Start failed: {error}</source>
+            <translation>開始に失敗しました：{error}</translation>
+        </message>
+        <message>
+            <source>Windows Graphics Capture is busy</source>
+            <translation>Windows Graphics Capture は使用中です</translation>
+        </message>
+        <message>
+            <source>Windows Graphics Capture is not supported on this system.</source>
+            <translation>このシステムは Windows Graphics Capture に対応していません。</translation>
+        </message>
+        <message>
+            <source>Paused because browser exited</source>
+            <translation>ブラウザーが終了したため一時停止しました</translation>
+        </message>
+        <message>
+            <source>Create Start Menu Shortcut</source>
+            <translation>スタートメニューのショートカットを作成</translation>
+        </message>
+        <message>
+            <source>Create Desktop Shortcut</source>
+            <translation>デスクトップのショートカットを作成</translation>
+        </message>
+        <message>
+            <source>Create or update the Start Menu shortcut when the app starts</source>
+            <translation>アプリ起動時にスタートメニューのショートカットを作成または更新します</translation>
+        </message>
+        <message>
+            <source>Create or update the Desktop shortcut when the app starts</source>
+            <translation>アプリ起動時にデスクトップのショートカットを作成または更新します</translation>
+        </message>
+        <message>
+            <source>Game</source>
+            <translation>ゲーム</translation>
+        </message>
+        <message>
+            <source>Tasks</source>
+            <translation>タスク</translation>
+        </message>
+        <message>
+            <source>Application</source>
+            <translation>アプリ</translation>
+        </message>
+        <message>
+            <source>Shortcuts</source>
+            <translation>ショートカット</translation>
+        </message>
+        <message>
+            <source>Developer</source>
+            <translation>開発者</translation>
+        </message>
+        <message>
+            <source>Other</source>
+            <translation>その他</translation>
+        </message>
+        <message>
+            <source>Created or updated shortcuts: {paths}</source>
+            <translation>ショートカットを作成または更新しました: {paths}</translation>
         </message>
     </context>
     <context>
@@ -1921,6 +2181,26 @@
         <message>
             <source>Cancel</source>
             <translation>キャンセル</translation>
+        </message>
+        <message>
+            <source>Modify</source>
+            <translation>変更</translation>
+        </message>
+        <message>
+            <source>Modify Schedule Task</source>
+            <translation>スケジュールタスクを変更</translation>
+        </message>
+        <message>
+            <source>Task Index (-t)</source>
+            <translation>タスク番号 (-t)</translation>
+        </message>
+        <message>
+            <source>Task Name</source>
+            <translation>タスク名</translation>
+        </message>
+        <message>
+            <source>Windows runs the app with this task at the chosen time, even when it is closed.</source>
+            <translation>アプリを閉じていても、指定した時刻に Windows がアプリを起動してこのタスクを実行します。</translation>
         </message>
     </context>
     <context>
@@ -2116,6 +2396,26 @@
             <source>Failed to create task</source>
             <translation>タスクの作成に失敗しました</translation>
         </message>
+        <message>
+            <source>Current App</source>
+            <translation>現在のアプリ</translation>
+        </message>
+        <message>
+            <source>No scheduled tasks</source>
+            <translation>スケジュールされたタスクはありません</translation>
+        </message>
+        <message>
+            <source>Run a task every day, week or month without opening the app.</source>
+            <translation>アプリを開かずに、毎日・毎週・毎月タスクを実行できます。</translation>
+        </message>
+        <message>
+            <source>Task Schedule</source>
+            <translation>タスクスケジュール</translation>
+        </message>
+        <message>
+            <source>Windows Task Scheduler starts the app and runs these tasks, even when the app is closed.</source>
+            <translation>アプリを閉じていても、Windows タスク スケジューラがアプリを起動してこれらのタスクを実行します。</translation>
+        </message>
     </context>
     <context>
         <name>MarkUpWindow</name>
@@ -2138,6 +2438,26 @@
         <message>
             <source>Right click to copy color</source>
             <translation>右クリックで色をコピー</translation>
+        </message>
+        <message>
+            <source>Features</source>
+            <translation>特徴</translation>
+        </message>
+        <message>
+            <source>Next image (→)</source>
+            <translation>次の画像 (→)</translation>
+        </message>
+        <message>
+            <source>No features yet. Press R and click two corners to draw one.</source>
+            <translation>特徴はまだありません。R を押して 2 つの角をクリックすると描けます。</translation>
+        </message>
+        <message>
+            <source>Previous image (←)</source>
+            <translation>前の画像 (←)</translation>
+        </message>
+        <message>
+            <source>Scroll to zoom  ·  Drag empty space to pan  ·  Drag a box to move it, its edges to resize  ·  Right click to copy the color  ·  Changes save automatically</source>
+            <translation>スクロールで拡大縮小  ·  空白をドラッグで移動  ·  枠をドラッグで移動、辺をドラッグでサイズ変更  ·  右クリックで色をコピー  ·  変更は自動保存されます</translation>
         </message>
     </context>
     <context>
@@ -2177,6 +2497,10 @@
         <message>
             <source>Already exists in '{}'</source>
             <translation>'{}' に既に存在します</translation>
+        </message>
+        <message>
+            <source>Name the feature tasks will look for.</source>
+            <translation>タスクが探す特徴に名前を付けます。</translation>
         </message>
     </context>
     <context>
@@ -2761,6 +3085,58 @@
             <source>Guide</source>
             <translation>ガイド</translation>
         </message>
+        <message>
+            <source>Error deleting task: {error}</source>
+            <translation>タスクの削除中にエラーが発生しました：{error}</translation>
+        </message>
+        <message>
+            <source>Error creating task: {error}</source>
+            <translation>タスクの作成中にエラーが発生しました：{error}</translation>
+        </message>
+        <message>
+            <source>Error copying task: {error}</source>
+            <translation>タスクのコピー中にエラーが発生しました：{error}</translation>
+        </message>
+        <message>
+            <source>Class Name (English only)</source>
+            <translation>クラス名（英字のみ）</translation>
+        </message>
+        <message>
+            <source>Click a call to insert it at the cursor.</source>
+            <translation>呼び出しをクリックするとカーソル位置に挿入されます。</translation>
+        </message>
+        <message>
+            <source>Confirm</source>
+            <translation>確認</translation>
+        </message>
+        <message>
+            <source>Create a task from scratch or copy an existing one to start.</source>
+            <translation>タスクを新規作成するか、既存のタスクをコピーして始めましょう。</translation>
+        </message>
+        <message>
+            <source>Description (Optional)</source>
+            <translation>説明（任意）</translation>
+        </message>
+        <message>
+            <source>Don't Save</source>
+            <translation>保存しない</translation>
+        </message>
+        <message>
+            <source>No scripts yet</source>
+            <translation>スクリプトはまだありません</translation>
+        </message>
+        <message>
+            <source>Select task to copy...</source>
+            <translation>コピーするタスクを選択...</translation>
+        </message>
+        <message>
+            <source>Task Name</source>
+            <translation>タスク名</translation>
+        </message>
+        <message>
+            <source>Templates</source>
+            <translation>テンプレート</translation>
+        </message>
     </context>
     <context>
         <name>CreateTaskDialog</name>
@@ -2910,6 +3286,38 @@
             <source>Invalid relative path. Example: ok_tasks/LabelEnum.py</source>
             <translation>無効な相対パスです。例: ok_tasks/LabelEnum.py</translation>
         </message>
+        <message>
+            <source>Generate function</source>
+            <translation>生成方法</translation>
+        </message>
+        <message>
+            <source>Split(Recommend)</source>
+            <translation>分割（推奨）</translation>
+        </message>
+        <message>
+            <source>Compress (obsolete)</source>
+            <translation>圧縮（非推奨）</translation>
+        </message>
+        <message>
+            <source>Screenshot failed: {e}</source>
+            <translation>スクリーンショットの撮影に失敗しました：{e}</translation>
+        </message>
+        <message>
+            <source>Save failed: {e}</source>
+            <translation>保存に失敗しました：{e}</translation>
+        </message>
+        <message>
+            <source>Delete failed: {e}</source>
+            <translation>削除に失敗しました：{e}</translation>
+        </message>
+        <message>
+            <source>Could not write screenshot to {path}</source>
+            <translation>スクリーンショットを {path} に書き込めませんでした</translation>
+        </message>
+        <message>
+            <source>Take a screenshot of the game, then mark up the features tasks should find.</source>
+            <translation>ゲームのスクリーンショットを撮り、タスクが探す特徴をマークします。</translation>
+        </message>
     </context>
     <context>
         <name>TemplateInputDialog</name>
@@ -2920,6 +3328,10 @@
         <message>
             <source>Cancel</source>
             <translation>キャンセル</translation>
+        </message>
+        <message>
+            <source>Parameter '{param_name}' is required!</source>
+            <translation>パラメーター「{param_name}」は必須です！</translation>
         </message>
     </context>
     <context>
@@ -2947,6 +3359,14 @@
         <message>
             <source>BrowserInteraction</source>
             <translation>BrowserInteraction - バックグラウンド</translation>
+        </message>
+        <message>
+            <source>Default Interaction</source>
+            <translation>既定の操作</translation>
+        </message>
+        <message>
+            <source>WindowsInteraction</source>
+            <translation>Windows 操作</translation>
         </message>
     </context>
     <context>
@@ -2981,6 +3401,22 @@
         <message>
             <source>Confirm Delete</source>
             <translation>削除の確認</translation>
+        </message>
+        <message>
+            <source>Copy annotation</source>
+            <translation>注釈をコピー</translation>
+        </message>
+        <message>
+            <source>Copy color</source>
+            <translation>色をコピー</translation>
+        </message>
+        <message>
+            <source>Delete</source>
+            <translation>削除</translation>
+        </message>
+        <message>
+            <source>Modify</source>
+            <translation>編集</translation>
         </message>
     </context>
     <context>
@@ -3018,773 +3454,6 @@
         <message>
             <source>Select File or Folder</source>
             <translation>ファイルまたはフォルダーを選択</translation>
-        </message>
-    </context>
-    <context>
-        <name>WebUI</name>
-        <message>
-            <source>Automation control</source>
-            <translation>自動化コントロール</translation>
-        </message>
-        <message>
-            <source>A local command center for tasks, triggers, and runtime events.</source>
-            <translation>タスク、トリガー、ランタイムイベントのローカルコントロールセンター。</translation>
-        </message>
-        <message>
-            <source>Live</source>
-            <translation>ライブ</translation>
-        </message>
-        <message>
-            <source>Reconnecting</source>
-            <translation>再接続中</translation>
-        </message>
-        <message>
-            <source>Runtime error</source>
-            <translation>ランタイムエラー</translation>
-        </message>
-        <message>
-            <source>Executor</source>
-            <translation>エグゼキューター</translation>
-        </message>
-        <message>
-            <source>Idle</source>
-            <translation>アイドル</translation>
-        </message>
-        <message>
-            <source>Current task</source>
-            <translation>現在のタスク</translation>
-        </message>
-        <message>
-            <source>None</source>
-            <translation>なし</translation>
-        </message>
-        <message>
-            <source>Resume</source>
-            <translation>再開</translation>
-        </message>
-        <message>
-            <source>Pause</source>
-            <translation>一時停止</translation>
-        </message>
-        <message>
-            <source>Stop task</source>
-            <translation>タスクを停止</translation>
-        </message>
-        <message>
-            <source>Tasks</source>
-            <translation>タスク</translation>
-        </message>
-        <message>
-            <source>{count} available</source>
-            <translation>{count} 件利用可能</translation>
-        </message>
-        <message>
-            <source>Filter tasks</source>
-            <translation>タスクを絞り込む</translation>
-        </message>
-        <message>
-            <source>Refresh tasks</source>
-            <translation>タスクを更新</translation>
-        </message>
-        <message>
-            <source>Refresh</source>
-            <translation>更新</translation>
-        </message>
-        <message>
-            <source>Trigger</source>
-            <translation>トリガー</translation>
-        </message>
-        <message>
-            <source>One-time</source>
-            <translation>1回限り</translation>
-        </message>
-        <message>
-            <source>Running</source>
-            <translation>実行中</translation>
-        </message>
-        <message>
-            <source>Paused</source>
-            <translation>一時停止中</translation>
-        </message>
-        <message>
-            <source>Start</source>
-            <translation>開始</translation>
-        </message>
-        <message>
-            <source>No tasks match “{query}”.</source>
-            <translation>「{query}」に一致するタスクはありません。</translation>
-        </message>
-        <message>
-            <source>Live events</source>
-            <translation>ライブイベント</translation>
-        </message>
-        <message>
-            <source>Latest 100 messages</source>
-            <translation>最新100件のメッセージ</translation>
-        </message>
-        <message>
-            <source>Clear</source>
-            <translation>クリア</translation>
-        </message>
-        <message>
-            <source>Waiting for runtime events…</source>
-            <translation>ランタイムイベントを待機中…</translation>
-        </message>
-        <message>
-            <source>Could not reach the automation runtime</source>
-            <translation>自動化ランタイムに接続できません</translation>
-        </message>
-        <message>
-            <source>Request failed</source>
-            <translation>リクエストに失敗しました</translation>
-        </message>
-        <message>
-            <source>Action failed</source>
-            <translation>操作に失敗しました</translation>
-        </message>
-        <message>
-            <source>Back</source>
-            <translation>戻る</translation>
-        </message>
-        <message>
-            <source>Capture</source>
-            <translation>キャプチャ</translation>
-        </message>
-        <message>
-            <source>Capture Method</source>
-            <translation>キャプチャ方法</translation>
-        </message>
-        <message>
-            <source>Choose Interaction</source>
-            <translation>操作方法の選択</translation>
-        </message>
-        <message>
-            <source>Choose Window</source>
-            <translation>ウィンドウを選択</translation>
-        </message>
-        <message>
-            <source>Close</source>
-            <translation>閉じる</translation>
-        </message>
-        <message>
-            <source>Debug</source>
-            <translation>デバッグ</translation>
-        </message>
-        <message>
-            <source>Disable Boxes</source>
-            <translation>ボックスを無効化</translation>
-        </message>
-        <message>
-            <source>Disconnected</source>
-            <translation>切断</translation>
-        </message>
-        <message>
-            <source>Enable Boxes</source>
-            <translation>ボックスを有効化</translation>
-        </message>
-        <message>
-            <source>Export Logs</source>
-            <translation>ログをエクスポート</translation>
-        </message>
-        <message>
-            <source>Install Folder</source>
-            <translation>インストールフォルダ</translation>
-        </message>
-        <message>
-            <source>Loading</source>
-            <translation>ロード中</translation>
-        </message>
-        <message>
-            <source>Log Folder</source>
-            <translation>ログフォルダー</translation>
-        </message>
-        <message>
-            <source>Maximize</source>
-            <translation>最大化</translation>
-        </message>
-        <message>
-            <source>Minimize</source>
-            <translation>最小化</translation>
-        </message>
-        <message>
-            <source>No options available</source>
-            <translation>利用可能なオプションがありません</translation>
-        </message>
-        <message>
-            <source>No windows found</source>
-            <translation>ウィンドウが見つかりません</translation>
-        </message>
-        <message>
-            <source>Refreshing</source>
-            <translation>更新中</translation>
-        </message>
-        <message>
-            <source>Screenshot Folder</source>
-            <translation>スクリーンショットフォルダー</translation>
-        </message>
-        <message>
-            <source>Search title or exe...</source>
-            <translation>タイトルまたは実行ファイルを検索...</translation>
-        </message>
-        <message>
-            <source>Toggle navigation</source>
-            <translation>ナビゲーションを切り替える</translation>
-        </message>
-        <message>
-            <source>View Log</source>
-            <translation>ログを表示</translation>
-        </message>
-        <message>
-            <source>{page} is not available in the web UI yet.</source>
-            <translation>{page} はまだ Web UI で利用できません。</translation>
-        </message>
-        <message>
-            <source>About</source>
-            <translation>概要</translation>
-        </message>
-        <message>
-            <source>Character Code</source>
-            <translation>キャラクターコード</translation>
-        </message>
-        <message>
-            <source>Character Settings</source>
-            <translation>キャラクター設定</translation>
-        </message>
-        <message>
-            <source>Game Hotkeys</source>
-            <translation>ゲームホットキー</translation>
-        </message>
-        <message>
-            <source>Notifications</source>
-            <translation>通知</translation>
-        </message>
-        <message>
-            <source>Schedule</source>
-            <translation>スケジュール</translation>
-        </message>
-        <message>
-            <source>Script</source>
-            <translation>スクリプト</translation>
-        </message>
-        <message>
-            <source>Settings</source>
-            <translation>設定</translation>
-        </message>
-        <message>
-            <source>Templates</source>
-            <translation>テンプレート</translation>
-        </message>
-        <message>
-            <source>Triggers</source>
-            <translation>トリガー</translation>
-        </message>
-        <message>
-            <source>All Levels</source>
-            <translation>全レベル</translation>
-        </message>
-        <message>
-            <source>Capture Preview</source>
-            <translation>キャプチャプレビュー</translation>
-        </message>
-        <message>
-            <source>Captured game frame</source>
-            <translation>キャプチャしたゲーム画面</translation>
-        </message>
-        <message>
-            <source>Could not load logs</source>
-            <translation>ログを読み込めません</translation>
-        </message>
-        <message>
-            <source>Filter logs...</source>
-            <translation>ログをフィルター...</translation>
-        </message>
-        <message>
-            <source>Log level</source>
-            <translation>ログレベル</translation>
-        </message>
-        <message>
-            <source>Waiting for ok-script.log</source>
-            <translation>ok-script.log を待機中</translation>
-        </message>
-        <message>
-            <source>lines</source>
-            <translation>行</translation>
-        </message>
-        <message>
-            <source>Open Screenshot Folder</source>
-            <translation>スクリーンショットフォルダーを開く</translation>
-        </message>
-        <message>
-            <source>Completed</source>
-            <translation>完了</translation>
-        </message>
-        <message>
-            <source>Time Elapsed</source>
-            <translation>経過時間</translation>
-        </message>
-        <message>
-            <source>Waiting for {task_name} task to be completed</source>
-            <translation>{task_name} タスクの完了を待機中</translation>
-        </message>
-        <message>
-            <source>Instructions</source>
-            <translation>使用説明</translation>
-        </message>
-        <message>
-            <source>Enabled</source>
-            <translation>有効</translation>
-        </message>
-        <message>
-            <source>Disabled</source>
-            <translation>無効</translation>
-        </message>
-        <message>
-            <source>Stop</source>
-            <translation>停止</translation>
-        </message>
-        <message>
-            <source>Reset Config</source>
-            <translation>設定をリセット</translation>
-        </message>
-        <message>
-            <source>App Config</source>
-            <translation>アプリ設定</translation>
-        </message>
-        <message>
-            <source>Application Theme</source>
-            <translation>アプリのテーマ</translation>
-        </message>
-        <message>
-            <source>Change the appearance of the application</source>
-            <translation>アプリケーションの外観を変更</translation>
-        </message>
-        <message>
-            <source>Light</source>
-            <translation>ライト</translation>
-        </message>
-        <message>
-            <source>Dark</source>
-            <translation>ダーク</translation>
-        </message>
-        <message>
-            <source>Use system setting</source>
-            <translation>システム設定を使用</translation>
-        </message>
-        <message>
-            <source>Language</source>
-            <translation>言語</translation>
-        </message>
-        <message>
-            <source>Set your preferred language</source>
-            <translation>優先言語を設定</translation>
-        </message>
-        <message>
-            <source>Actions</source>
-            <translation>操作</translation>
-        </message>
-        <message>
-            <source>Add</source>
-            <translation>追加</translation>
-        </message>
-        <message>
-            <source>Auto Exit After Task</source>
-            <translation>Auto Exit After Task</translation>
-        </message>
-        <message>
-            <source>Available Options</source>
-            <translation>利用可能なオプション</translation>
-        </message>
-        <message>
-            <source>Bounding Box</source>
-            <translation>バウンディングボックス</translation>
-        </message>
-        <message>
-            <source>Cancel</source>
-            <translation>キャンセル</translation>
-        </message>
-        <message>
-            <source>Category name</source>
-            <translation>カテゴリ名</translation>
-        </message>
-        <message>
-            <source>Choose Task:</source>
-            <translation>タスクを選択:</translation>
-        </message>
-        <message>
-            <source>Class Name (English only)</source>
-            <translation>クラス名 (英語のみ)</translation>
-        </message>
-        <message>
-            <source>Confirm</source>
-            <translation>確認</translation>
-        </message>
-        <message>
-            <source>Confirm Delete</source>
-            <translation>削除の確認</translation>
-        </message>
-        <message>
-            <source>Copy Task</source>
-            <translation>タスクをコピー</translation>
-        </message>
-        <message>
-            <source>Create</source>
-            <translation>作成</translation>
-        </message>
-        <message>
-            <source>Create New Task</source>
-            <translation>新規タスクを作成</translation>
-        </message>
-        <message>
-            <source>Create Schedule Task</source>
-            <translation>スケジュールタスクを作成</translation>
-        </message>
-        <message>
-            <source>Create Task</source>
-            <translation>タスクを作成</translation>
-        </message>
-        <message>
-            <source>Current App</source>
-            <translation>Current App</translation>
-        </message>
-        <message>
-            <source>Days</source>
-            <translation>日</translation>
-        </message>
-        <message>
-            <source>Delete</source>
-            <translation>削除</translation>
-        </message>
-        <message>
-            <source>Delete Task</source>
-            <translation>タスクを削除</translation>
-        </message>
-        <message>
-            <source>Description (Optional)</source>
-            <translation>説明 (任意)</translation>
-        </message>
-        <message>
-            <source>File</source>
-            <translation>ファイル</translation>
-        </message>
-        <message>
-            <source>Generate label enum file</source>
-            <translation>ラベル列挙ファイルを生成</translation>
-        </message>
-        <message>
-            <source>Guide</source>
-            <translation>ガイド</translation>
-        </message>
-        <message>
-            <source>Hour</source>
-            <translation>時間</translation>
-        </message>
-        <message>
-            <source>Hours</source>
-            <translation>時間</translation>
-        </message>
-        <message>
-            <source>Markup</source>
-            <translation>標注</translation>
-        </message>
-        <message>
-            <source>Minute</source>
-            <translation>分</translation>
-        </message>
-        <message>
-            <source>Modify</source>
-            <translation>修正</translation>
-        </message>
-        <message>
-            <source>Modify Schedule Task</source>
-            <translation>スケジュールタスクを修正</translation>
-        </message>
-        <message>
-            <source>Move Down</source>
-            <translation>下へ</translation>
-        </message>
-        <message>
-            <source>Move Up</source>
-            <translation>上へ</translation>
-        </message>
-        <message>
-            <source>Next Run</source>
-            <translation>次回実行</translation>
-        </message>
-        <message>
-            <source>No templates yet</source>
-            <translation>テンプレートがありません</translation>
-        </message>
-        <message>
-            <source>OK</source>
-            <translation>OK</translation>
-        </message>
-        <message>
-            <source>Other Projects</source>
-            <translation>関連プロジェクト</translation>
-        </message>
-        <message>
-            <source>Relative path, e.g. ok_tasks/LabelEnum.py</source>
-            <translation>相対パス（例: ok_tasks/LabelEnum.py）</translation>
-        </message>
-        <message>
-            <source>Remove</source>
-            <translation>削除</translation>
-        </message>
-        <message>
-            <source>Run</source>
-            <translation>実行</translation>
-        </message>
-        <message>
-            <source>Save</source>
-            <translation>保存</translation>
-        </message>
-        <message>
-            <source>Save To</source>
-            <translation>保存先</translation>
-        </message>
-        <message>
-            <source>Saved</source>
-            <translation>Saved</translation>
-        </message>
-        <message>
-            <source>Screenshot</source>
-            <translation>スクリーンショット</translation>
-        </message>
-        <message>
-            <source>Search by name or category...</source>
-            <translation>名前またはカテゴリで検索...</translation>
-        </message>
-        <message>
-            <source>Search templates...</source>
-            <translation>テンプレートを検索...</translation>
-        </message>
-        <message>
-            <source>Select Task</source>
-            <translation>タスクを選択</translation>
-        </message>
-        <message>
-            <source>Select task to edit</source>
-            <translation>Select task to edit</translation>
-        </message>
-        <message>
-            <source>Selected Options</source>
-            <translation>選択したオプション</translation>
-        </message>
-        <message>
-            <source>Status</source>
-            <translation>状態</translation>
-        </message>
-        <message>
-            <source>Take Screenshot</source>
-            <translation>スクリーンショットを撮る</translation>
-        </message>
-        <message>
-            <source>Task Name</source>
-            <translation>タスク名</translation>
-        </message>
-        <message>
-            <source>Task rebuilt successfully.</source>
-            <translation>タスクの再構築に成功しました。</translation>
-        </message>
-        <message>
-            <source>Timeout</source>
-            <translation>タイムアウト</translation>
-        </message>
-        <message>
-            <source>Trigger Type</source>
-            <translation>トリガータイプ</translation>
-        </message>
-        <message>
-            <source>assets (standalone app)</source>
-            <translation>assets (スタンドアロンアプリ)</translation>
-        </message>
-        <message>
-            <source>ok_tasks/assets (custom scripts)</source>
-            <translation>ok_tasks/assets (カスタムスクリプト)</translation>
-        </message>
-        <message>
-            <source>GitHub</source>
-            <translation>GitHub</translation>
-        </message>
-        <message>
-            <source>FAQ</source>
-            <translation>FAQ</translation>
-        </message>
-        <message>
-            <source>Website</source>
-            <translation>ウェブサイト</translation>
-        </message>
-        <message>
-            <source>ok-py Automation Tool</source>
-            <translation>ok-py 自動化ツール</translation>
-        </message>
-        <message>
-            <source>ok-script App Template</source>
-            <translation>ok-script アプリテンプレート</translation>
-        </message>
-        <message>
-            <source>Wuthering Waves</source>
-            <translation>鳴潮</translation>
-        </message>
-        <message>
-            <source>Girls' Frontline 2</source>
-            <translation>ドールズフロントライン2</translation>
-        </message>
-        <message>
-            <source>Star Resonance</source>
-            <translation>星痕共鳴</translation>
-        </message>
-        <message>
-            <source>Duet Night Abyss</source>
-            <translation>デュエットナイトアビス</translation>
-        </message>
-        <message>
-            <source>Chaos Zero Nightmare</source>
-            <translation>カオスゼロナイトメア</translation>
-        </message>
-        <message>
-            <source>Onmyoji</source>
-            <translation>陰陽師</translation>
-        </message>
-        <message>
-            <source>Arknights: Endfield</source>
-            <translation>アークナイツ：エンドフィールド</translation>
-        </message>
-        <message>
-            <source>Neverness to Everness</source>
-            <translation>Neverness to Everness</translation>
-        </message>
-        <message>
-            <source>Discord</source>
-            <translation>Discord</translation>
-        </message>
-        <message>
-            <source>Share</source>
-            <translation>ダウンロードリンクを共有</translation>
-        </message>
-        <message>
-            <source>Sponsor</source>
-            <translation>スポンサー</translation>
-        </message>
-        <message>
-            <source>Share Link copied to clipboard</source>
-            <translation>共有リンクをクリップボードにコピーしました</translation>
-        </message>
-        <message>
-            <source>Starting</source>
-            <translation>起動中</translation>
-        </message>
-        <message>
-            <source>App update</source>
-            <translation>アプリの更新</translation>
-        </message>
-        <message>
-            <source>Disclaimer</source>
-            <translation>免責事項</translation>
-        </message>
-        <message>
-            <source>Check Test Version</source>
-            <translation>テスト版を確認</translation>
-        </message>
-        <message>
-            <source>Check for updates</source>
-            <translation>更新を確認</translation>
-        </message>
-        <message>
-            <source>Click to check for updates</source>
-            <translation>クリックして更新を確認</translation>
-        </message>
-        <message>
-            <source>Version</source>
-            <translation>バージョン</translation>
-        </message>
-        <message>
-            <source>Update</source>
-            <translation>更新</translation>
-        </message>
-        <message>
-            <source>Downgrade</source>
-            <translation>ダウングレード</translation>
-        </message>
-        <message>
-            <source>Current version</source>
-            <translation>現在のバージョン</translation>
-        </message>
-        <message>
-            <source>Checking for updates…</source>
-            <translation>更新を確認しています…</translation>
-        </message>
-        <message>
-            <source>Starting change to {version}…</source>
-            <translation>{version} への切り替えを開始しています…</translation>
-        </message>
-        <message>
-            <source>Failed to check for updates: {error}</source>
-            <translation>更新の確認に失敗しました: {error}</translation>
-        </message>
-        <message>
-            <source>No versions are available.</source>
-            <translation>利用可能なバージョンはありません。</translation>
-        </message>
-        <message>
-            <source>No updates available.</source>
-            <translation>利用可能な更新はありません。</translation>
-        </message>
-        <message>
-            <source>No release notes.</source>
-            <translation>リリースノートはありません。</translation>
-        </message>
-        <message>
-            <source>Update request accepted. The app will restart to apply it.</source>
-            <translation>更新要求を受け付けました。適用するためアプリを再起動します。</translation>
-        </message>
-        <message>
-            <source>Failed to change version: {error}</source>
-            <translation>バージョンの変更に失敗しました: {error}</translation>
-        </message>
-        <message>
-            <source>Update available.</source>
-            <translation>更新があります。</translation>
-        </message>
-        <message>
-            <source>Auto HDR is enabled, tasks might not work correctly!</source>
-            <translation>自動HDRが有効です。タスクが正常に動作しない可能性があります！</translation>
-        </message>
-        <message>
-            <source>WGC - Fast, support HDR (not AutoHDR)</source>
-            <translation>WGC - 高速、HDR 対応（AutoHDR 非対応）</translation>
-        </message>
-        <message>
-            <source>WGC_HDR - Only use when using Windows AutoHDR (Not Recommended)</source>
-            <translation>WGC_HDR - Windows AutoHDR 使用時のみ使用（非推奨）</translation>
-        </message>
-        <message>
-            <source>Resolution {resolution} check failed, some tasks might not work correctly!</source>
-            <translation>解像度{resolution}のチェックに失敗しました。一部のタスクが正常に動作しない可能性があります！</translation>
-        </message>
-        <message>
-            <source>, the supported ratio is {supported_ratio}</source>
-            <translation>、サポートされている比率は{supported_ratio}です</translation>
-        </message>
-        <message>
-            <source>, the supported min resolution is {min_size}</source>
-            <translation>、サポートされている最小解像度は{min_size}です</translation>
-        </message>
-        <message>
-            <source>{vendor} {feature} is enabled and may cause malfunctions!</source>
-            <translation>{vendor} {feature} が有効になっており、誤動作の原因になる可能性があります！</translation>
-        </message>
-        <message>
-            <source>GPU Driver Warning</source>
-            <translation>GPU ドライバー警告</translation>
-        </message>
-        <message>
-            <source>Fast, support HDR (not AutoHDR)</source>
-            <translation>高速、HDR 対応（AutoHDR 非対応）</translation>
-        </message>
-        <message>
-            <source>Only use when using Windows AutoHDR (Not Recommended)</source>
-            <translation>Windows AutoHDR 使用時のみ使用（非推奨）</translation>
         </message>
     </context>
     <context>
@@ -3875,6 +3544,370 @@
         <message>
             <source>Download</source>
             <translation>ダウンロード</translation>
+        </message>
+    </context>
+    <context>
+        <name>PluginTab</name>
+        <message>
+            <source>Plugins</source>
+            <translation>プラグイン</translation>
+        </message>
+        <message>
+            <source>Add from ZIP</source>
+            <translation>ZIP から追加</translation>
+        </message>
+        <message>
+            <source>Add from GitHub</source>
+            <translation>GitHub から追加</translation>
+        </message>
+        <message>
+            <source>No plugins installed.</source>
+            <translation>プラグインはインストールされていません。</translation>
+        </message>
+        <message>
+            <source>Version: {}</source>
+            <translation>バージョン：{}</translation>
+        </message>
+        <message>
+            <source>Delete plugin</source>
+            <translation>プラグインを削除</translation>
+        </message>
+        <message>
+            <source>Working…</source>
+            <translation>処理中…</translation>
+        </message>
+        <message>
+            <source>Plugin operation failed: {}</source>
+            <translation>プラグインの操作に失敗しました：{}</translation>
+        </message>
+        <message>
+            <source>Install plugin</source>
+            <translation>プラグインをインストール</translation>
+        </message>
+        <message>
+            <source>GitHub repository</source>
+            <translation>GitHub リポジトリ</translation>
+        </message>
+        <message>
+            <source>Release asset</source>
+            <translation>リリースのファイル</translation>
+        </message>
+        <message>
+            <source>Plugin installed.</source>
+            <translation>プラグインをインストールしました。</translation>
+        </message>
+        <message>
+            <source>Delete plugin "{}"?</source>
+            <translation>プラグイン「{}」を削除しますか？</translation>
+        </message>
+        <message>
+            <source>Plugin deleted.</source>
+            <translation>プラグインを削除しました。</translation>
+        </message>
+        <message>
+            <source>Check for updates</source>
+            <translation>更新を確認</translation>
+        </message>
+        <message>
+            <source>Update to {}</source>
+            <translation>{} に更新</translation>
+        </message>
+        <message>
+            <source>Update check failed: {}</source>
+            <translation>更新の確認に失敗しました：{}</translation>
+        </message>
+        <message>
+            <source>Update available for {}: {}</source>
+            <translation>{} の更新があります：{}</translation>
+        </message>
+        <message>
+            <source>Plugin is up to date.</source>
+            <translation>プラグインは最新です。</translation>
+        </message>
+        <message>
+            <source>Checking for updates…</source>
+            <translation>更新を確認中…</translation>
+        </message>
+        <message>
+            <source>Restart the application to apply plugin changes.</source>
+            <translation>プラグインの変更を適用するにはアプリを再起動してください。</translation>
+        </message>
+        <message>
+            <source>Plugin change failed: {}</source>
+            <translation>プラグインの変更に失敗しました：{}</translation>
+        </message>
+        <message>
+            <source>Update failed. Restart to restore the previous version.</source>
+            <translation>更新に失敗しました。再起動すると前のバージョンに戻ります。</translation>
+        </message>
+        <message>
+            <source>Deletion staged. Restart to apply.</source>
+            <translation>削除を予約しました。再起動後に適用されます。</translation>
+        </message>
+        <message>
+            <source>Update staged: {}. Restart to apply.</source>
+            <translation>更新を準備しました：{}。再起動後に適用されます。</translation>
+        </message>
+        <message>
+            <source>Cancel pending change</source>
+            <translation>保留中の変更を取り消す</translation>
+        </message>
+        <message>
+            <source>Backup cleanup pending. Restart to retry.</source>
+            <translation>バックアップの削除が保留中です。再起動して再試行してください。</translation>
+        </message>
+        <message>
+            <source>The release archive belongs to a different plugin</source>
+            <translation>このリリースアーカイブは別のプラグインのものです</translation>
+        </message>
+        <message>
+            <source>The release archive is not a newer plugin version</source>
+            <translation>このリリースアーカイブは新しいプラグインバージョンではありません</translation>
+        </message>
+        <message>
+            <source>Add a plugin from a ZIP file or a GitHub release.</source>
+            <translation>ZIP ファイルまたは GitHub リリースからプラグインを追加します。</translation>
+        </message>
+        <message>
+            <source>From GitHub: {}</source>
+            <translation>GitHub から: {}</translation>
+        </message>
+    </context>
+    <context>
+        <name>LabelAndMcpServer</name>
+        <message>
+            <source>Enable MCP Server?</source>
+            <translation>MCP サーバーを有効にしますか？</translation>
+        </message>
+        <message>
+            <source>MCP lets local coding agents control this app and execute Python code with your account permissions, including reading and changing files. Only connect trusted agents and keep the connection token private. Enable the server now?</source>
+            <translation>MCP を使用すると、ローカルのコーディングエージェントがこのアプリを操作し、ファイルの読み取りや変更を含む Python コードをあなたのアカウント権限で実行できます。信頼できるエージェントのみ接続し、接続トークンを他人に公開しないでください。今すぐサーバーを有効にしますか？</translation>
+        </message>
+        <message>
+            <source>MCP server error</source>
+            <translation>MCP サーバーエラー</translation>
+        </message>
+        <message>
+            <source>Yes</source>
+            <translation>はい</translation>
+        </message>
+        <message>
+            <source>No</source>
+            <translation>いいえ</translation>
+        </message>
+    </context>
+    <context>
+        <name>JobControls</name>
+        <message>
+            <source>The app is controlled by {owner}</source>
+            <translation>アプリは {owner} によって制御されています</translation>
+        </message>
+        <message>
+            <source>Failed after {seconds}s</source>
+            <translation>{seconds} 秒後に失敗しました</translation>
+        </message>
+    </context>
+    <context>
+        <name>ConnectionPopover</name>
+        <message>
+            <source>Game window</source>
+            <translation>ゲームウィンドウ</translation>
+        </message>
+        <message>
+            <source>Open folder</source>
+            <translation>フォルダーを開く</translation>
+        </message>
+    </context>
+    <context>
+        <name>DiagnosisPage</name>
+        <message>
+            <source>Boxes</source>
+            <translation>ボックス</translation>
+        </message>
+        <message>
+            <source>Captures, OCR results and task screenshots appear here.</source>
+            <translation>キャプチャ、OCR の結果、タスクのスクリーンショットがここに表示されます。</translation>
+        </message>
+        <message>
+            <source>Developer</source>
+            <translation>開発者</translation>
+        </message>
+        <message>
+            <source>Dump Threads</source>
+            <translation>スレッドをダンプ</translation>
+        </message>
+        <message>
+            <source>No screenshot yet. Capture one to see it here.</source>
+            <translation>スクリーンショットはまだありません。キャプチャするとここに表示されます。</translation>
+        </message>
+        <message>
+            <source>No text found</source>
+            <translation>テキストが見つかりません</translation>
+        </message>
+        <message>
+            <source>Open</source>
+            <translation>開く</translation>
+        </message>
+        <message>
+            <source>Open image</source>
+            <translation>画像を開く</translation>
+        </message>
+        <message>
+            <source>Open screenshot folder</source>
+            <translation>スクリーンショットフォルダーを開く</translation>
+        </message>
+        <message>
+            <source>Original</source>
+            <translation>元画像</translation>
+        </message>
+        <message>
+            <source>Recent</source>
+            <translation>最近</translation>
+        </message>
+        <message>
+            <source>Run OCR on the current frame and save a screenshot with the text boxes</source>
+            <translation>現在の画面で OCR を実行し、テキスト枠付きのスクリーンショットを保存します</translation>
+        </message>
+        <message>
+            <source>Saved to {path}</source>
+            <translation>{path} に保存しました</translation>
+        </message>
+        <message>
+            <source>Screenshots</source>
+            <translation>スクリーンショット</translation>
+        </message>
+        <message>
+            <source>Show in folder</source>
+            <translation>フォルダーで表示</translation>
+        </message>
+        <message>
+            <source>Write every thread's stack to logs/thread_dumps.txt</source>
+            <translation>すべてのスレッドのスタックを logs/thread_dumps.txt に書き出します</translation>
+        </message>
+    </context>
+    <context>
+        <name>Dialog</name>
+        <message>
+            <source>Cancel</source>
+            <translation>キャンセル</translation>
+        </message>
+        <message>
+            <source>OK</source>
+            <translation>OK</translation>
+        </message>
+    </context>
+    <context>
+        <name>LogPage</name>
+        <message>
+            <source>Jump to latest</source>
+            <translation>最新へ移動</translation>
+        </message>
+        <message>
+            <source>lines</source>
+            <translation>行</translation>
+        </message>
+    </context>
+    <context>
+        <name>NavigationView</name>
+        <message>
+            <source>Collapse</source>
+            <translation>折りたたむ</translation>
+        </message>
+        <message>
+            <source>Expand</source>
+            <translation>展開</translation>
+        </message>
+    </context>
+    <context>
+        <name>RunBar</name>
+        <message>
+            <source>+{count} queued</source>
+            <translation>+{count} 件待機中</translation>
+        </message>
+        <message>
+            <source>Cancel</source>
+            <translation>キャンセル</translation>
+        </message>
+        <message>
+            <source>Cancel this task</source>
+            <translation>このタスクをキャンセル</translation>
+        </message>
+        <message>
+            <source>Game</source>
+            <translation>ゲーム</translation>
+        </message>
+        <message>
+            <source>Launches the game if needed, then runs triggers and queued tasks</source>
+            <translation>必要ならゲームを起動し、トリガーと待機中のタスクを実行します</translation>
+        </message>
+        <message>
+            <source>Launching {name}</source>
+            <translation>{name} を起動中</translation>
+        </message>
+        <message>
+            <source>No game selected</source>
+            <translation>ゲームが選択されていません</translation>
+        </message>
+        <message>
+            <source>Pause {name}</source>
+            <translation>{name} を一時停止</translation>
+        </message>
+        <message>
+            <source>Start {name}</source>
+            <translation>{name} を開始</translation>
+        </message>
+    </context>
+    <context>
+        <name>TaskDetail</name>
+        <message>
+            <source>This task has no settings.</source>
+            <translation>このタスクには設定がありません。</translation>
+        </message>
+    </context>
+    <context>
+        <name>TasksPage</name>
+        <message>
+            <source>All</source>
+            <translation>すべて</translation>
+        </message>
+        <message>
+            <source>More actions</source>
+            <translation>その他の操作</translation>
+        </message>
+        <message>
+            <source>On-demand</source>
+            <translation>手動</translation>
+        </message>
+        <message>
+            <source>Paused</source>
+            <translation>一時停止中</translation>
+        </message>
+        <message>
+            <source>Queued</source>
+            <translation>待機中</translation>
+        </message>
+        <message>
+            <source>Run task</source>
+            <translation>タスクを実行</translation>
+        </message>
+        <message>
+            <source>Select a task to see its settings.</source>
+            <translation>タスクを選ぶと設定が表示されます。</translation>
+        </message>
+        <message>
+            <source>Settings</source>
+            <translation>設定</translation>
+        </message>
+        <message>
+            <source>Triggers</source>
+            <translation>トリガー</translation>
+        </message>
+    </context>
+    <context>
+        <name>Toast</name>
+        <message>
+            <source>Close</source>
+            <translation>閉じる</translation>
         </message>
     </context>
 </TS>
