@@ -1,6 +1,6 @@
 # ok-script
 
-本分支提供独立的[录屏与标注模板工具](docs/screen-recording.md)，用于录屏、提取关键帧、编辑标注及导出 COCO 模板。
+本分支保留[录屏与标注模板工具](docs/screen-recording.md)，用于采集操作演示与识别素材。当前兼容状态和分支用途见[本仓库说明](docs/maintainers/fork.md)。
 
 **简体中文** | [English](README_en.md)
 

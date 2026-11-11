@@ -1,7 +1,9 @@
 # 录屏与标注模板
 
-本分支在官方 `ok-oldking/ok-script` 的 `master` 上增加录屏与标注工具。
+本分支在官方 `ok-oldking/ok-script` 的基础上保留录屏与标注工具。
 桌面界面左侧的「录屏模板」页面包含「录屏」和「编辑录屏模板」两个标签页。
+
+当前实现使用官方提交 `6814e65` 对应的 Qt 界面。适配官方新版界面待完成；分支与后续方向见[本仓库说明](maintainers/fork.md)。
 
 ## 使用
 
@@ -19,11 +21,4 @@ python -m ok gui --config my_project.config:config
 
 普通模板、多样本规则模板、匹配预览、分组、标注撤销与重做、Agent 辅助标注提示词均沿用原有实现。录屏包格式保持兼容。
 
-## 分支维护
-
-- `codex/screen-recording-annotation`：录屏、关键帧、OCR、标注编辑、模板导出与匹配。
-- `private/panghu-local`：保留原有行为树和可视化流程开发历史。
-- 新分支基于官方 `upstream/master` 的 `dac12d4`，不包含行为树运行时、流程编辑器及录屏转流程入口。
-- 录屏素材与项目模板属于本地数据，不纳入此分支的源代码提交。
-
-Qt 模块使用 `ok.ui.qt.video_template` 路径；原有 `ok.gui` Qt 兼容入口继续由框架提供。
+录屏素材与项目模板属于本地数据，不纳入源代码提交。
